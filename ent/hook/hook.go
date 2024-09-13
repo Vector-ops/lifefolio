@@ -9,6 +9,54 @@ import (
 	"github.com/vector-ops/lifefolio/ent"
 )
 
+// The AccessRequestFunc type is an adapter to allow the use of ordinary
+// function as AccessRequest mutator.
+type AccessRequestFunc func(context.Context, *ent.AccessRequestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AccessRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AccessRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccessRequestMutation", m)
+}
+
+// The InstitutionFunc type is an adapter to allow the use of ordinary
+// function as Institution mutator.
+type InstitutionFunc func(context.Context, *ent.InstitutionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InstitutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InstitutionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InstitutionMutation", m)
+}
+
+// The MedicalRecordFunc type is an adapter to allow the use of ordinary
+// function as MedicalRecord mutator.
+type MedicalRecordFunc func(context.Context, *ent.MedicalRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MedicalRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MedicalRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MedicalRecordMutation", m)
+}
+
+// The RecordAccessFunc type is an adapter to allow the use of ordinary
+// function as RecordAccess mutator.
+type RecordAccessFunc func(context.Context, *ent.RecordAccessMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RecordAccessFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RecordAccessMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RecordAccessMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

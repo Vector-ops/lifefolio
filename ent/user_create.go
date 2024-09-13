@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/vector-ops/lifefolio/ent/institution"
+	"github.com/vector-ops/lifefolio/ent/medicalrecord"
 	"github.com/vector-ops/lifefolio/ent/user"
 )
 
@@ -21,13 +23,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetFirstName sets the "firstName" field.
+// SetFirstName sets the "first_name" field.
 func (uc *UserCreate) SetFirstName(s string) *UserCreate {
 	uc.mutation.SetFirstName(s)
 	return uc
 }
 
-// SetLastName sets the "lastName" field.
+// SetLastName sets the "last_name" field.
 func (uc *UserCreate) SetLastName(s string) *UserCreate {
 	uc.mutation.SetLastName(s)
 	return uc
@@ -59,13 +61,27 @@ func (uc *UserCreate) SetNillableDOB(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetBloodGroup sets the "bloodGroup" field.
+// SetUserType sets the "user_type" field.
+func (uc *UserCreate) SetUserType(ut user.UserType) *UserCreate {
+	uc.mutation.SetUserType(ut)
+	return uc
+}
+
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUserType(ut *user.UserType) *UserCreate {
+	if ut != nil {
+		uc.SetUserType(*ut)
+	}
+	return uc
+}
+
+// SetBloodGroup sets the "blood_group" field.
 func (uc *UserCreate) SetBloodGroup(ug user.BloodGroup) *UserCreate {
 	uc.mutation.SetBloodGroup(ug)
 	return uc
 }
 
-// SetNillableBloodGroup sets the "bloodGroup" field if the given value is not nil.
+// SetNillableBloodGroup sets the "blood_group" field if the given value is not nil.
 func (uc *UserCreate) SetNillableBloodGroup(ug *user.BloodGroup) *UserCreate {
 	if ug != nil {
 		uc.SetBloodGroup(*ug)
@@ -101,13 +117,13 @@ func (uc *UserCreate) SetNillableHeight(f *float32) *UserCreate {
 	return uc
 }
 
-// SetIsArchived sets the "isArchived" field.
+// SetIsArchived sets the "is_archived" field.
 func (uc *UserCreate) SetIsArchived(b bool) *UserCreate {
 	uc.mutation.SetIsArchived(b)
 	return uc
 }
 
-// SetNillableIsArchived sets the "isArchived" field if the given value is not nil.
+// SetNillableIsArchived sets the "is_archived" field if the given value is not nil.
 func (uc *UserCreate) SetNillableIsArchived(b *bool) *UserCreate {
 	if b != nil {
 		uc.SetIsArchived(*b)
@@ -115,13 +131,13 @@ func (uc *UserCreate) SetNillableIsArchived(b *bool) *UserCreate {
 	return uc
 }
 
-// SetIsVerified sets the "isVerified" field.
+// SetIsVerified sets the "is_verified" field.
 func (uc *UserCreate) SetIsVerified(b bool) *UserCreate {
 	uc.mutation.SetIsVerified(b)
 	return uc
 }
 
-// SetNillableIsVerified sets the "isVerified" field if the given value is not nil.
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
 func (uc *UserCreate) SetNillableIsVerified(b *bool) *UserCreate {
 	if b != nil {
 		uc.SetIsVerified(*b)
@@ -129,13 +145,13 @@ func (uc *UserCreate) SetNillableIsVerified(b *bool) *UserCreate {
 	return uc
 }
 
-// SetCreatedAt sets the "createdAt" field.
+// SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
 	return uc
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetCreatedAt(*t)
@@ -143,13 +159,13 @@ func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetUpdatedAt sets the "updatedAt" field.
+// SetUpdatedAt sets the "updated_at" field.
 func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetUpdatedAt(t)
 	return uc
 }
 
-// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetUpdatedAt(*t)
@@ -157,15 +173,21 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetArchivedAt sets the "archivedAt" field.
+// SetArchivedAt sets the "archived_at" field.
 func (uc *UserCreate) SetArchivedAt(t time.Time) *UserCreate {
 	uc.mutation.SetArchivedAt(t)
 	return uc
 }
 
-// SetVerifiedAt sets the "verifiedAt" field.
+// SetVerifiedAt sets the "verified_at" field.
 func (uc *UserCreate) SetVerifiedAt(t time.Time) *UserCreate {
 	uc.mutation.SetVerifiedAt(t)
+	return uc
+}
+
+// SetOtp sets the "otp" field.
+func (uc *UserCreate) SetOtp(i int64) *UserCreate {
+	uc.mutation.SetOtp(i)
 	return uc
 }
 
@@ -173,6 +195,40 @@ func (uc *UserCreate) SetVerifiedAt(t time.Time) *UserCreate {
 func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
 	return uc
+}
+
+// AddMedicalrecordIDs adds the "medicalrecord" edge to the MedicalRecord entity by IDs.
+func (uc *UserCreate) AddMedicalrecordIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddMedicalrecordIDs(ids...)
+	return uc
+}
+
+// AddMedicalrecord adds the "medicalrecord" edges to the MedicalRecord entity.
+func (uc *UserCreate) AddMedicalrecord(m ...*MedicalRecord) *UserCreate {
+	ids := make([]uuid.UUID, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddMedicalrecordIDs(ids...)
+}
+
+// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
+func (uc *UserCreate) SetInstitutionID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetInstitutionID(id)
+	return uc
+}
+
+// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableInstitutionID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetInstitutionID(*id)
+	}
+	return uc
+}
+
+// SetInstitution sets the "institution" edge to the Institution entity.
+func (uc *UserCreate) SetInstitution(i *Institution) *UserCreate {
+	return uc.SetInstitutionID(i.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -214,6 +270,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultDOB
 		uc.mutation.SetDOB(v)
 	}
+	if _, ok := uc.mutation.UserType(); !ok {
+		v := user.DefaultUserType
+		uc.mutation.SetUserType(v)
+	}
 	if _, ok := uc.mutation.IsArchived(); !ok {
 		v := user.DefaultIsArchived
 		uc.mutation.SetIsArchived(v)
@@ -223,11 +283,11 @@ func (uc *UserCreate) defaults() {
 		uc.mutation.SetIsVerified(v)
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
-		v := user.DefaultCreatedAt
+		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
-		v := user.DefaultUpdatedAt
+		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
 }
@@ -235,19 +295,19 @@ func (uc *UserCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.FirstName(); !ok {
-		return &ValidationError{Name: "firstName", err: errors.New(`ent: missing required field "User.firstName"`)}
+		return &ValidationError{Name: "first_name", err: errors.New(`ent: missing required field "User.first_name"`)}
 	}
 	if v, ok := uc.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
-			return &ValidationError{Name: "firstName", err: fmt.Errorf(`ent: validator failed for field "User.firstName": %w`, err)}
+			return &ValidationError{Name: "first_name", err: fmt.Errorf(`ent: validator failed for field "User.first_name": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.LastName(); !ok {
-		return &ValidationError{Name: "lastName", err: errors.New(`ent: missing required field "User.lastName"`)}
+		return &ValidationError{Name: "last_name", err: errors.New(`ent: missing required field "User.last_name"`)}
 	}
 	if v, ok := uc.mutation.LastName(); ok {
 		if err := user.LastNameValidator(v); err != nil {
-			return &ValidationError{Name: "lastName", err: fmt.Errorf(`ent: validator failed for field "User.lastName": %w`, err)}
+			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Email(); !ok {
@@ -264,28 +324,39 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.DOB(); !ok {
 		return &ValidationError{Name: "DOB", err: errors.New(`ent: missing required field "User.DOB"`)}
 	}
+	if _, ok := uc.mutation.UserType(); !ok {
+		return &ValidationError{Name: "user_type", err: errors.New(`ent: missing required field "User.user_type"`)}
+	}
+	if v, ok := uc.mutation.UserType(); ok {
+		if err := user.UserTypeValidator(v); err != nil {
+			return &ValidationError{Name: "user_type", err: fmt.Errorf(`ent: validator failed for field "User.user_type": %w`, err)}
+		}
+	}
 	if v, ok := uc.mutation.BloodGroup(); ok {
 		if err := user.BloodGroupValidator(v); err != nil {
-			return &ValidationError{Name: "bloodGroup", err: fmt.Errorf(`ent: validator failed for field "User.bloodGroup": %w`, err)}
+			return &ValidationError{Name: "blood_group", err: fmt.Errorf(`ent: validator failed for field "User.blood_group": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.IsArchived(); !ok {
-		return &ValidationError{Name: "isArchived", err: errors.New(`ent: missing required field "User.isArchived"`)}
+		return &ValidationError{Name: "is_archived", err: errors.New(`ent: missing required field "User.is_archived"`)}
 	}
 	if _, ok := uc.mutation.IsVerified(); !ok {
-		return &ValidationError{Name: "isVerified", err: errors.New(`ent: missing required field "User.isVerified"`)}
+		return &ValidationError{Name: "is_verified", err: errors.New(`ent: missing required field "User.is_verified"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "User.createdAt"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
 	}
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "User.updatedAt"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "User.updated_at"`)}
 	}
 	if _, ok := uc.mutation.ArchivedAt(); !ok {
-		return &ValidationError{Name: "archivedAt", err: errors.New(`ent: missing required field "User.archivedAt"`)}
+		return &ValidationError{Name: "archived_at", err: errors.New(`ent: missing required field "User.archived_at"`)}
 	}
 	if _, ok := uc.mutation.VerifiedAt(); !ok {
-		return &ValidationError{Name: "verifiedAt", err: errors.New(`ent: missing required field "User.verifiedAt"`)}
+		return &ValidationError{Name: "verified_at", err: errors.New(`ent: missing required field "User.verified_at"`)}
+	}
+	if _, ok := uc.mutation.Otp(); !ok {
+		return &ValidationError{Name: "otp", err: errors.New(`ent: missing required field "User.otp"`)}
 	}
 	return nil
 }
@@ -342,6 +413,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDOB, field.TypeTime, value)
 		_node.DOB = value
 	}
+	if value, ok := uc.mutation.UserType(); ok {
+		_spec.SetField(user.FieldUserType, field.TypeEnum, value)
+		_node.UserType = value
+	}
 	if value, ok := uc.mutation.BloodGroup(); ok {
 		_spec.SetField(user.FieldBloodGroup, field.TypeEnum, value)
 		_node.BloodGroup = value
@@ -377,6 +452,43 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.VerifiedAt(); ok {
 		_spec.SetField(user.FieldVerifiedAt, field.TypeTime, value)
 		_node.VerifiedAt = &value
+	}
+	if value, ok := uc.mutation.Otp(); ok {
+		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+		_node.Otp = &value
+	}
+	if nodes := uc.mutation.MedicalrecordIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.InstitutionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.InstitutionTable,
+			Columns: []string{user.InstitutionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.institution_doctor = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

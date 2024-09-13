@@ -11,6 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/vector-ops/lifefolio/ent/institution"
+	"github.com/vector-ops/lifefolio/ent/medicalrecord"
 	"github.com/vector-ops/lifefolio/ent/predicate"
 	"github.com/vector-ops/lifefolio/ent/user"
 )
@@ -28,13 +31,13 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetFirstName sets the "firstName" field.
+// SetFirstName sets the "first_name" field.
 func (uu *UserUpdate) SetFirstName(s string) *UserUpdate {
 	uu.mutation.SetFirstName(s)
 	return uu
 }
 
-// SetNillableFirstName sets the "firstName" field if the given value is not nil.
+// SetNillableFirstName sets the "first_name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableFirstName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetFirstName(*s)
@@ -42,13 +45,13 @@ func (uu *UserUpdate) SetNillableFirstName(s *string) *UserUpdate {
 	return uu
 }
 
-// SetLastName sets the "lastName" field.
+// SetLastName sets the "last_name" field.
 func (uu *UserUpdate) SetLastName(s string) *UserUpdate {
 	uu.mutation.SetLastName(s)
 	return uu
 }
 
-// SetNillableLastName sets the "lastName" field if the given value is not nil.
+// SetNillableLastName sets the "last_name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableLastName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetLastName(*s)
@@ -98,13 +101,27 @@ func (uu *UserUpdate) SetNillableDOB(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// SetBloodGroup sets the "bloodGroup" field.
+// SetUserType sets the "user_type" field.
+func (uu *UserUpdate) SetUserType(ut user.UserType) *UserUpdate {
+	uu.mutation.SetUserType(ut)
+	return uu
+}
+
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUserType(ut *user.UserType) *UserUpdate {
+	if ut != nil {
+		uu.SetUserType(*ut)
+	}
+	return uu
+}
+
+// SetBloodGroup sets the "blood_group" field.
 func (uu *UserUpdate) SetBloodGroup(ug user.BloodGroup) *UserUpdate {
 	uu.mutation.SetBloodGroup(ug)
 	return uu
 }
 
-// SetNillableBloodGroup sets the "bloodGroup" field if the given value is not nil.
+// SetNillableBloodGroup sets the "blood_group" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableBloodGroup(ug *user.BloodGroup) *UserUpdate {
 	if ug != nil {
 		uu.SetBloodGroup(*ug)
@@ -112,7 +129,7 @@ func (uu *UserUpdate) SetNillableBloodGroup(ug *user.BloodGroup) *UserUpdate {
 	return uu
 }
 
-// ClearBloodGroup clears the value of the "bloodGroup" field.
+// ClearBloodGroup clears the value of the "blood_group" field.
 func (uu *UserUpdate) ClearBloodGroup() *UserUpdate {
 	uu.mutation.ClearBloodGroup()
 	return uu
@@ -172,13 +189,13 @@ func (uu *UserUpdate) ClearHeight() *UserUpdate {
 	return uu
 }
 
-// SetIsArchived sets the "isArchived" field.
+// SetIsArchived sets the "is_archived" field.
 func (uu *UserUpdate) SetIsArchived(b bool) *UserUpdate {
 	uu.mutation.SetIsArchived(b)
 	return uu
 }
 
-// SetNillableIsArchived sets the "isArchived" field if the given value is not nil.
+// SetNillableIsArchived sets the "is_archived" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableIsArchived(b *bool) *UserUpdate {
 	if b != nil {
 		uu.SetIsArchived(*b)
@@ -186,13 +203,13 @@ func (uu *UserUpdate) SetNillableIsArchived(b *bool) *UserUpdate {
 	return uu
 }
 
-// SetIsVerified sets the "isVerified" field.
+// SetIsVerified sets the "is_verified" field.
 func (uu *UserUpdate) SetIsVerified(b bool) *UserUpdate {
 	uu.mutation.SetIsVerified(b)
 	return uu
 }
 
-// SetNillableIsVerified sets the "isVerified" field if the given value is not nil.
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableIsVerified(b *bool) *UserUpdate {
 	if b != nil {
 		uu.SetIsVerified(*b)
@@ -200,13 +217,13 @@ func (uu *UserUpdate) SetNillableIsVerified(b *bool) *UserUpdate {
 	return uu
 }
 
-// SetCreatedAt sets the "createdAt" field.
+// SetCreatedAt sets the "created_at" field.
 func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetCreatedAt(t)
 	return uu
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
 	if t != nil {
 		uu.SetCreatedAt(*t)
@@ -214,13 +231,13 @@ func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// SetUpdatedAt sets the "updatedAt" field.
+// SetUpdatedAt sets the "updated_at" field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetUpdatedAt(t)
 	return uu
 }
 
-// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableUpdatedAt(t *time.Time) *UserUpdate {
 	if t != nil {
 		uu.SetUpdatedAt(*t)
@@ -228,13 +245,13 @@ func (uu *UserUpdate) SetNillableUpdatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// SetArchivedAt sets the "archivedAt" field.
+// SetArchivedAt sets the "archived_at" field.
 func (uu *UserUpdate) SetArchivedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetArchivedAt(t)
 	return uu
 }
 
-// SetNillableArchivedAt sets the "archivedAt" field if the given value is not nil.
+// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableArchivedAt(t *time.Time) *UserUpdate {
 	if t != nil {
 		uu.SetArchivedAt(*t)
@@ -242,13 +259,13 @@ func (uu *UserUpdate) SetNillableArchivedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// SetVerifiedAt sets the "verifiedAt" field.
+// SetVerifiedAt sets the "verified_at" field.
 func (uu *UserUpdate) SetVerifiedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetVerifiedAt(t)
 	return uu
 }
 
-// SetNillableVerifiedAt sets the "verifiedAt" field if the given value is not nil.
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableVerifiedAt(t *time.Time) *UserUpdate {
 	if t != nil {
 		uu.SetVerifiedAt(*t)
@@ -256,9 +273,91 @@ func (uu *UserUpdate) SetNillableVerifiedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
+// SetOtp sets the "otp" field.
+func (uu *UserUpdate) SetOtp(i int64) *UserUpdate {
+	uu.mutation.ResetOtp()
+	uu.mutation.SetOtp(i)
+	return uu
+}
+
+// SetNillableOtp sets the "otp" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableOtp(i *int64) *UserUpdate {
+	if i != nil {
+		uu.SetOtp(*i)
+	}
+	return uu
+}
+
+// AddOtp adds i to the "otp" field.
+func (uu *UserUpdate) AddOtp(i int64) *UserUpdate {
+	uu.mutation.AddOtp(i)
+	return uu
+}
+
+// AddMedicalrecordIDs adds the "medicalrecord" edge to the MedicalRecord entity by IDs.
+func (uu *UserUpdate) AddMedicalrecordIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddMedicalrecordIDs(ids...)
+	return uu
+}
+
+// AddMedicalrecord adds the "medicalrecord" edges to the MedicalRecord entity.
+func (uu *UserUpdate) AddMedicalrecord(m ...*MedicalRecord) *UserUpdate {
+	ids := make([]uuid.UUID, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.AddMedicalrecordIDs(ids...)
+}
+
+// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
+func (uu *UserUpdate) SetInstitutionID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetInstitutionID(id)
+	return uu
+}
+
+// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableInstitutionID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetInstitutionID(*id)
+	}
+	return uu
+}
+
+// SetInstitution sets the "institution" edge to the Institution entity.
+func (uu *UserUpdate) SetInstitution(i *Institution) *UserUpdate {
+	return uu.SetInstitutionID(i.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearMedicalrecord clears all "medicalrecord" edges to the MedicalRecord entity.
+func (uu *UserUpdate) ClearMedicalrecord() *UserUpdate {
+	uu.mutation.ClearMedicalrecord()
+	return uu
+}
+
+// RemoveMedicalrecordIDs removes the "medicalrecord" edge to MedicalRecord entities by IDs.
+func (uu *UserUpdate) RemoveMedicalrecordIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveMedicalrecordIDs(ids...)
+	return uu
+}
+
+// RemoveMedicalrecord removes "medicalrecord" edges to MedicalRecord entities.
+func (uu *UserUpdate) RemoveMedicalrecord(m ...*MedicalRecord) *UserUpdate {
+	ids := make([]uuid.UUID, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.RemoveMedicalrecordIDs(ids...)
+}
+
+// ClearInstitution clears the "institution" edge to the Institution entity.
+func (uu *UserUpdate) ClearInstitution() *UserUpdate {
+	uu.mutation.ClearInstitution()
+	return uu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -292,12 +391,12 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 func (uu *UserUpdate) check() error {
 	if v, ok := uu.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
-			return &ValidationError{Name: "firstName", err: fmt.Errorf(`ent: validator failed for field "User.firstName": %w`, err)}
+			return &ValidationError{Name: "first_name", err: fmt.Errorf(`ent: validator failed for field "User.first_name": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.LastName(); ok {
 		if err := user.LastNameValidator(v); err != nil {
-			return &ValidationError{Name: "lastName", err: fmt.Errorf(`ent: validator failed for field "User.lastName": %w`, err)}
+			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Email(); ok {
@@ -305,9 +404,14 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
+	if v, ok := uu.mutation.UserType(); ok {
+		if err := user.UserTypeValidator(v); err != nil {
+			return &ValidationError{Name: "user_type", err: fmt.Errorf(`ent: validator failed for field "User.user_type": %w`, err)}
+		}
+	}
 	if v, ok := uu.mutation.BloodGroup(); ok {
 		if err := user.BloodGroupValidator(v); err != nil {
-			return &ValidationError{Name: "bloodGroup", err: fmt.Errorf(`ent: validator failed for field "User.bloodGroup": %w`, err)}
+			return &ValidationError{Name: "blood_group", err: fmt.Errorf(`ent: validator failed for field "User.blood_group": %w`, err)}
 		}
 	}
 	return nil
@@ -339,6 +443,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.DOB(); ok {
 		_spec.SetField(user.FieldDOB, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.UserType(); ok {
+		_spec.SetField(user.FieldUserType, field.TypeEnum, value)
 	}
 	if value, ok := uu.mutation.BloodGroup(); ok {
 		_spec.SetField(user.FieldBloodGroup, field.TypeEnum, value)
@@ -382,6 +489,86 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.VerifiedAt(); ok {
 		_spec.SetField(user.FieldVerifiedAt, field.TypeTime, value)
 	}
+	if value, ok := uu.mutation.Otp(); ok {
+		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+	}
+	if value, ok := uu.mutation.AddedOtp(); ok {
+		_spec.AddField(user.FieldOtp, field.TypeInt64, value)
+	}
+	if uu.mutation.MedicalrecordCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedMedicalrecordIDs(); len(nodes) > 0 && !uu.mutation.MedicalrecordCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.MedicalrecordIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.InstitutionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.InstitutionTable,
+			Columns: []string{user.InstitutionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.InstitutionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.InstitutionTable,
+			Columns: []string{user.InstitutionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -402,13 +589,13 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetFirstName sets the "firstName" field.
+// SetFirstName sets the "first_name" field.
 func (uuo *UserUpdateOne) SetFirstName(s string) *UserUpdateOne {
 	uuo.mutation.SetFirstName(s)
 	return uuo
 }
 
-// SetNillableFirstName sets the "firstName" field if the given value is not nil.
+// SetNillableFirstName sets the "first_name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableFirstName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetFirstName(*s)
@@ -416,13 +603,13 @@ func (uuo *UserUpdateOne) SetNillableFirstName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetLastName sets the "lastName" field.
+// SetLastName sets the "last_name" field.
 func (uuo *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
 	uuo.mutation.SetLastName(s)
 	return uuo
 }
 
-// SetNillableLastName sets the "lastName" field if the given value is not nil.
+// SetNillableLastName sets the "last_name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableLastName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetLastName(*s)
@@ -472,13 +659,27 @@ func (uuo *UserUpdateOne) SetNillableDOB(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// SetBloodGroup sets the "bloodGroup" field.
+// SetUserType sets the "user_type" field.
+func (uuo *UserUpdateOne) SetUserType(ut user.UserType) *UserUpdateOne {
+	uuo.mutation.SetUserType(ut)
+	return uuo
+}
+
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUserType(ut *user.UserType) *UserUpdateOne {
+	if ut != nil {
+		uuo.SetUserType(*ut)
+	}
+	return uuo
+}
+
+// SetBloodGroup sets the "blood_group" field.
 func (uuo *UserUpdateOne) SetBloodGroup(ug user.BloodGroup) *UserUpdateOne {
 	uuo.mutation.SetBloodGroup(ug)
 	return uuo
 }
 
-// SetNillableBloodGroup sets the "bloodGroup" field if the given value is not nil.
+// SetNillableBloodGroup sets the "blood_group" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableBloodGroup(ug *user.BloodGroup) *UserUpdateOne {
 	if ug != nil {
 		uuo.SetBloodGroup(*ug)
@@ -486,7 +687,7 @@ func (uuo *UserUpdateOne) SetNillableBloodGroup(ug *user.BloodGroup) *UserUpdate
 	return uuo
 }
 
-// ClearBloodGroup clears the value of the "bloodGroup" field.
+// ClearBloodGroup clears the value of the "blood_group" field.
 func (uuo *UserUpdateOne) ClearBloodGroup() *UserUpdateOne {
 	uuo.mutation.ClearBloodGroup()
 	return uuo
@@ -546,13 +747,13 @@ func (uuo *UserUpdateOne) ClearHeight() *UserUpdateOne {
 	return uuo
 }
 
-// SetIsArchived sets the "isArchived" field.
+// SetIsArchived sets the "is_archived" field.
 func (uuo *UserUpdateOne) SetIsArchived(b bool) *UserUpdateOne {
 	uuo.mutation.SetIsArchived(b)
 	return uuo
 }
 
-// SetNillableIsArchived sets the "isArchived" field if the given value is not nil.
+// SetNillableIsArchived sets the "is_archived" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableIsArchived(b *bool) *UserUpdateOne {
 	if b != nil {
 		uuo.SetIsArchived(*b)
@@ -560,13 +761,13 @@ func (uuo *UserUpdateOne) SetNillableIsArchived(b *bool) *UserUpdateOne {
 	return uuo
 }
 
-// SetIsVerified sets the "isVerified" field.
+// SetIsVerified sets the "is_verified" field.
 func (uuo *UserUpdateOne) SetIsVerified(b bool) *UserUpdateOne {
 	uuo.mutation.SetIsVerified(b)
 	return uuo
 }
 
-// SetNillableIsVerified sets the "isVerified" field if the given value is not nil.
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableIsVerified(b *bool) *UserUpdateOne {
 	if b != nil {
 		uuo.SetIsVerified(*b)
@@ -574,13 +775,13 @@ func (uuo *UserUpdateOne) SetNillableIsVerified(b *bool) *UserUpdateOne {
 	return uuo
 }
 
-// SetCreatedAt sets the "createdAt" field.
+// SetCreatedAt sets the "created_at" field.
 func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreatedAt(t)
 	return uuo
 }
 
-// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetCreatedAt(*t)
@@ -588,13 +789,13 @@ func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// SetUpdatedAt sets the "updatedAt" field.
+// SetUpdatedAt sets the "updated_at" field.
 func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetUpdatedAt(t)
 	return uuo
 }
 
-// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableUpdatedAt(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetUpdatedAt(*t)
@@ -602,13 +803,13 @@ func (uuo *UserUpdateOne) SetNillableUpdatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// SetArchivedAt sets the "archivedAt" field.
+// SetArchivedAt sets the "archived_at" field.
 func (uuo *UserUpdateOne) SetArchivedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetArchivedAt(t)
 	return uuo
 }
 
-// SetNillableArchivedAt sets the "archivedAt" field if the given value is not nil.
+// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableArchivedAt(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetArchivedAt(*t)
@@ -616,13 +817,13 @@ func (uuo *UserUpdateOne) SetNillableArchivedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// SetVerifiedAt sets the "verifiedAt" field.
+// SetVerifiedAt sets the "verified_at" field.
 func (uuo *UserUpdateOne) SetVerifiedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetVerifiedAt(t)
 	return uuo
 }
 
-// SetNillableVerifiedAt sets the "verifiedAt" field if the given value is not nil.
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableVerifiedAt(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetVerifiedAt(*t)
@@ -630,9 +831,91 @@ func (uuo *UserUpdateOne) SetNillableVerifiedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetOtp sets the "otp" field.
+func (uuo *UserUpdateOne) SetOtp(i int64) *UserUpdateOne {
+	uuo.mutation.ResetOtp()
+	uuo.mutation.SetOtp(i)
+	return uuo
+}
+
+// SetNillableOtp sets the "otp" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOtp(i *int64) *UserUpdateOne {
+	if i != nil {
+		uuo.SetOtp(*i)
+	}
+	return uuo
+}
+
+// AddOtp adds i to the "otp" field.
+func (uuo *UserUpdateOne) AddOtp(i int64) *UserUpdateOne {
+	uuo.mutation.AddOtp(i)
+	return uuo
+}
+
+// AddMedicalrecordIDs adds the "medicalrecord" edge to the MedicalRecord entity by IDs.
+func (uuo *UserUpdateOne) AddMedicalrecordIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddMedicalrecordIDs(ids...)
+	return uuo
+}
+
+// AddMedicalrecord adds the "medicalrecord" edges to the MedicalRecord entity.
+func (uuo *UserUpdateOne) AddMedicalrecord(m ...*MedicalRecord) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.AddMedicalrecordIDs(ids...)
+}
+
+// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
+func (uuo *UserUpdateOne) SetInstitutionID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetInstitutionID(id)
+	return uuo
+}
+
+// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableInstitutionID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetInstitutionID(*id)
+	}
+	return uuo
+}
+
+// SetInstitution sets the "institution" edge to the Institution entity.
+func (uuo *UserUpdateOne) SetInstitution(i *Institution) *UserUpdateOne {
+	return uuo.SetInstitutionID(i.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearMedicalrecord clears all "medicalrecord" edges to the MedicalRecord entity.
+func (uuo *UserUpdateOne) ClearMedicalrecord() *UserUpdateOne {
+	uuo.mutation.ClearMedicalrecord()
+	return uuo
+}
+
+// RemoveMedicalrecordIDs removes the "medicalrecord" edge to MedicalRecord entities by IDs.
+func (uuo *UserUpdateOne) RemoveMedicalrecordIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveMedicalrecordIDs(ids...)
+	return uuo
+}
+
+// RemoveMedicalrecord removes "medicalrecord" edges to MedicalRecord entities.
+func (uuo *UserUpdateOne) RemoveMedicalrecord(m ...*MedicalRecord) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.RemoveMedicalrecordIDs(ids...)
+}
+
+// ClearInstitution clears the "institution" edge to the Institution entity.
+func (uuo *UserUpdateOne) ClearInstitution() *UserUpdateOne {
+	uuo.mutation.ClearInstitution()
+	return uuo
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -679,12 +962,12 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
-			return &ValidationError{Name: "firstName", err: fmt.Errorf(`ent: validator failed for field "User.firstName": %w`, err)}
+			return &ValidationError{Name: "first_name", err: fmt.Errorf(`ent: validator failed for field "User.first_name": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.LastName(); ok {
 		if err := user.LastNameValidator(v); err != nil {
-			return &ValidationError{Name: "lastName", err: fmt.Errorf(`ent: validator failed for field "User.lastName": %w`, err)}
+			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Email(); ok {
@@ -692,9 +975,14 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
+	if v, ok := uuo.mutation.UserType(); ok {
+		if err := user.UserTypeValidator(v); err != nil {
+			return &ValidationError{Name: "user_type", err: fmt.Errorf(`ent: validator failed for field "User.user_type": %w`, err)}
+		}
+	}
 	if v, ok := uuo.mutation.BloodGroup(); ok {
 		if err := user.BloodGroupValidator(v); err != nil {
-			return &ValidationError{Name: "bloodGroup", err: fmt.Errorf(`ent: validator failed for field "User.bloodGroup": %w`, err)}
+			return &ValidationError{Name: "blood_group", err: fmt.Errorf(`ent: validator failed for field "User.blood_group": %w`, err)}
 		}
 	}
 	return nil
@@ -744,6 +1032,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.DOB(); ok {
 		_spec.SetField(user.FieldDOB, field.TypeTime, value)
 	}
+	if value, ok := uuo.mutation.UserType(); ok {
+		_spec.SetField(user.FieldUserType, field.TypeEnum, value)
+	}
 	if value, ok := uuo.mutation.BloodGroup(); ok {
 		_spec.SetField(user.FieldBloodGroup, field.TypeEnum, value)
 	}
@@ -785,6 +1076,86 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.VerifiedAt(); ok {
 		_spec.SetField(user.FieldVerifiedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.Otp(); ok {
+		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+	}
+	if value, ok := uuo.mutation.AddedOtp(); ok {
+		_spec.AddField(user.FieldOtp, field.TypeInt64, value)
+	}
+	if uuo.mutation.MedicalrecordCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedMedicalrecordIDs(); len(nodes) > 0 && !uuo.mutation.MedicalrecordCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.MedicalrecordIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MedicalrecordTable,
+			Columns: []string{user.MedicalrecordColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.InstitutionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.InstitutionTable,
+			Columns: []string{user.InstitutionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.InstitutionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.InstitutionTable,
+			Columns: []string{user.InstitutionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

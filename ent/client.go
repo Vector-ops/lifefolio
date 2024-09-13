@@ -15,6 +15,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/vector-ops/lifefolio/ent/accessrequest"
+	"github.com/vector-ops/lifefolio/ent/institution"
+	"github.com/vector-ops/lifefolio/ent/medicalrecord"
+	"github.com/vector-ops/lifefolio/ent/recordaccess"
 	"github.com/vector-ops/lifefolio/ent/user"
 )
 
@@ -23,6 +28,14 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AccessRequest is the client for interacting with the AccessRequest builders.
+	AccessRequest *AccessRequestClient
+	// Institution is the client for interacting with the Institution builders.
+	Institution *InstitutionClient
+	// MedicalRecord is the client for interacting with the MedicalRecord builders.
+	MedicalRecord *MedicalRecordClient
+	// RecordAccess is the client for interacting with the RecordAccess builders.
+	RecordAccess *RecordAccessClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -36,6 +49,10 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AccessRequest = NewAccessRequestClient(c.config)
+	c.Institution = NewInstitutionClient(c.config)
+	c.MedicalRecord = NewMedicalRecordClient(c.config)
+	c.RecordAccess = NewRecordAccessClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -127,9 +144,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		AccessRequest: NewAccessRequestClient(cfg),
+		Institution:   NewInstitutionClient(cfg),
+		MedicalRecord: NewMedicalRecordClient(cfg),
+		RecordAccess:  NewRecordAccessClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -147,16 +168,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		AccessRequest: NewAccessRequestClient(cfg),
+		Institution:   NewInstitutionClient(cfg),
+		MedicalRecord: NewMedicalRecordClient(cfg),
+		RecordAccess:  NewRecordAccessClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		AccessRequest.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -178,22 +203,698 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.AccessRequest.Use(hooks...)
+	c.Institution.Use(hooks...)
+	c.MedicalRecord.Use(hooks...)
+	c.RecordAccess.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.AccessRequest.Intercept(interceptors...)
+	c.Institution.Intercept(interceptors...)
+	c.MedicalRecord.Intercept(interceptors...)
+	c.RecordAccess.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AccessRequestMutation:
+		return c.AccessRequest.mutate(ctx, m)
+	case *InstitutionMutation:
+		return c.Institution.mutate(ctx, m)
+	case *MedicalRecordMutation:
+		return c.MedicalRecord.mutate(ctx, m)
+	case *RecordAccessMutation:
+		return c.RecordAccess.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AccessRequestClient is a client for the AccessRequest schema.
+type AccessRequestClient struct {
+	config
+}
+
+// NewAccessRequestClient returns a client for the AccessRequest from the given config.
+func NewAccessRequestClient(c config) *AccessRequestClient {
+	return &AccessRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `accessrequest.Hooks(f(g(h())))`.
+func (c *AccessRequestClient) Use(hooks ...Hook) {
+	c.hooks.AccessRequest = append(c.hooks.AccessRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `accessrequest.Intercept(f(g(h())))`.
+func (c *AccessRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AccessRequest = append(c.inters.AccessRequest, interceptors...)
+}
+
+// Create returns a builder for creating a AccessRequest entity.
+func (c *AccessRequestClient) Create() *AccessRequestCreate {
+	mutation := newAccessRequestMutation(c.config, OpCreate)
+	return &AccessRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AccessRequest entities.
+func (c *AccessRequestClient) CreateBulk(builders ...*AccessRequestCreate) *AccessRequestCreateBulk {
+	return &AccessRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AccessRequestClient) MapCreateBulk(slice any, setFunc func(*AccessRequestCreate, int)) *AccessRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AccessRequestCreateBulk{err: fmt.Errorf("calling to AccessRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AccessRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AccessRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AccessRequest.
+func (c *AccessRequestClient) Update() *AccessRequestUpdate {
+	mutation := newAccessRequestMutation(c.config, OpUpdate)
+	return &AccessRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AccessRequestClient) UpdateOne(ar *AccessRequest) *AccessRequestUpdateOne {
+	mutation := newAccessRequestMutation(c.config, OpUpdateOne, withAccessRequest(ar))
+	return &AccessRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AccessRequestClient) UpdateOneID(id int) *AccessRequestUpdateOne {
+	mutation := newAccessRequestMutation(c.config, OpUpdateOne, withAccessRequestID(id))
+	return &AccessRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AccessRequest.
+func (c *AccessRequestClient) Delete() *AccessRequestDelete {
+	mutation := newAccessRequestMutation(c.config, OpDelete)
+	return &AccessRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AccessRequestClient) DeleteOne(ar *AccessRequest) *AccessRequestDeleteOne {
+	return c.DeleteOneID(ar.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AccessRequestClient) DeleteOneID(id int) *AccessRequestDeleteOne {
+	builder := c.Delete().Where(accessrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AccessRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for AccessRequest.
+func (c *AccessRequestClient) Query() *AccessRequestQuery {
+	return &AccessRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAccessRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AccessRequest entity by its id.
+func (c *AccessRequestClient) Get(ctx context.Context, id int) (*AccessRequest, error) {
+	return c.Query().Where(accessrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AccessRequestClient) GetX(ctx context.Context, id int) *AccessRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AccessRequestClient) Hooks() []Hook {
+	return c.hooks.AccessRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *AccessRequestClient) Interceptors() []Interceptor {
+	return c.inters.AccessRequest
+}
+
+func (c *AccessRequestClient) mutate(ctx context.Context, m *AccessRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AccessRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AccessRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AccessRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AccessRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AccessRequest mutation op: %q", m.Op())
+	}
+}
+
+// InstitutionClient is a client for the Institution schema.
+type InstitutionClient struct {
+	config
+}
+
+// NewInstitutionClient returns a client for the Institution from the given config.
+func NewInstitutionClient(c config) *InstitutionClient {
+	return &InstitutionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `institution.Hooks(f(g(h())))`.
+func (c *InstitutionClient) Use(hooks ...Hook) {
+	c.hooks.Institution = append(c.hooks.Institution, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `institution.Intercept(f(g(h())))`.
+func (c *InstitutionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Institution = append(c.inters.Institution, interceptors...)
+}
+
+// Create returns a builder for creating a Institution entity.
+func (c *InstitutionClient) Create() *InstitutionCreate {
+	mutation := newInstitutionMutation(c.config, OpCreate)
+	return &InstitutionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Institution entities.
+func (c *InstitutionClient) CreateBulk(builders ...*InstitutionCreate) *InstitutionCreateBulk {
+	return &InstitutionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InstitutionClient) MapCreateBulk(slice any, setFunc func(*InstitutionCreate, int)) *InstitutionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InstitutionCreateBulk{err: fmt.Errorf("calling to InstitutionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InstitutionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InstitutionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Institution.
+func (c *InstitutionClient) Update() *InstitutionUpdate {
+	mutation := newInstitutionMutation(c.config, OpUpdate)
+	return &InstitutionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InstitutionClient) UpdateOne(i *Institution) *InstitutionUpdateOne {
+	mutation := newInstitutionMutation(c.config, OpUpdateOne, withInstitution(i))
+	return &InstitutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InstitutionClient) UpdateOneID(id uuid.UUID) *InstitutionUpdateOne {
+	mutation := newInstitutionMutation(c.config, OpUpdateOne, withInstitutionID(id))
+	return &InstitutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Institution.
+func (c *InstitutionClient) Delete() *InstitutionDelete {
+	mutation := newInstitutionMutation(c.config, OpDelete)
+	return &InstitutionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InstitutionClient) DeleteOne(i *Institution) *InstitutionDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InstitutionClient) DeleteOneID(id uuid.UUID) *InstitutionDeleteOne {
+	builder := c.Delete().Where(institution.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InstitutionDeleteOne{builder}
+}
+
+// Query returns a query builder for Institution.
+func (c *InstitutionClient) Query() *InstitutionQuery {
+	return &InstitutionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInstitution},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Institution entity by its id.
+func (c *InstitutionClient) Get(ctx context.Context, id uuid.UUID) (*Institution, error) {
+	return c.Query().Where(institution.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InstitutionClient) GetX(ctx context.Context, id uuid.UUID) *Institution {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRecordaccess queries the recordaccess edge of a Institution.
+func (c *InstitutionClient) QueryRecordaccess(i *Institution) *RecordAccessQuery {
+	query := (&RecordAccessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(institution.Table, institution.FieldID, id),
+			sqlgraph.To(recordaccess.Table, recordaccess.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institution.RecordaccessTable, institution.RecordaccessColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDoctor queries the doctor edge of a Institution.
+func (c *InstitutionClient) QueryDoctor(i *Institution) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(institution.Table, institution.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institution.DoctorTable, institution.DoctorColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMedicalrecord queries the medicalrecord edge of a Institution.
+func (c *InstitutionClient) QueryMedicalrecord(i *Institution) *MedicalRecordQuery {
+	query := (&MedicalRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(institution.Table, institution.FieldID, id),
+			sqlgraph.To(medicalrecord.Table, medicalrecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institution.MedicalrecordTable, institution.MedicalrecordColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InstitutionClient) Hooks() []Hook {
+	return c.hooks.Institution
+}
+
+// Interceptors returns the client interceptors.
+func (c *InstitutionClient) Interceptors() []Interceptor {
+	return c.inters.Institution
+}
+
+func (c *InstitutionClient) mutate(ctx context.Context, m *InstitutionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InstitutionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InstitutionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InstitutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InstitutionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Institution mutation op: %q", m.Op())
+	}
+}
+
+// MedicalRecordClient is a client for the MedicalRecord schema.
+type MedicalRecordClient struct {
+	config
+}
+
+// NewMedicalRecordClient returns a client for the MedicalRecord from the given config.
+func NewMedicalRecordClient(c config) *MedicalRecordClient {
+	return &MedicalRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `medicalrecord.Hooks(f(g(h())))`.
+func (c *MedicalRecordClient) Use(hooks ...Hook) {
+	c.hooks.MedicalRecord = append(c.hooks.MedicalRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `medicalrecord.Intercept(f(g(h())))`.
+func (c *MedicalRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MedicalRecord = append(c.inters.MedicalRecord, interceptors...)
+}
+
+// Create returns a builder for creating a MedicalRecord entity.
+func (c *MedicalRecordClient) Create() *MedicalRecordCreate {
+	mutation := newMedicalRecordMutation(c.config, OpCreate)
+	return &MedicalRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MedicalRecord entities.
+func (c *MedicalRecordClient) CreateBulk(builders ...*MedicalRecordCreate) *MedicalRecordCreateBulk {
+	return &MedicalRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MedicalRecordClient) MapCreateBulk(slice any, setFunc func(*MedicalRecordCreate, int)) *MedicalRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MedicalRecordCreateBulk{err: fmt.Errorf("calling to MedicalRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MedicalRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MedicalRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MedicalRecord.
+func (c *MedicalRecordClient) Update() *MedicalRecordUpdate {
+	mutation := newMedicalRecordMutation(c.config, OpUpdate)
+	return &MedicalRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MedicalRecordClient) UpdateOne(mr *MedicalRecord) *MedicalRecordUpdateOne {
+	mutation := newMedicalRecordMutation(c.config, OpUpdateOne, withMedicalRecord(mr))
+	return &MedicalRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MedicalRecordClient) UpdateOneID(id uuid.UUID) *MedicalRecordUpdateOne {
+	mutation := newMedicalRecordMutation(c.config, OpUpdateOne, withMedicalRecordID(id))
+	return &MedicalRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MedicalRecord.
+func (c *MedicalRecordClient) Delete() *MedicalRecordDelete {
+	mutation := newMedicalRecordMutation(c.config, OpDelete)
+	return &MedicalRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MedicalRecordClient) DeleteOne(mr *MedicalRecord) *MedicalRecordDeleteOne {
+	return c.DeleteOneID(mr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MedicalRecordClient) DeleteOneID(id uuid.UUID) *MedicalRecordDeleteOne {
+	builder := c.Delete().Where(medicalrecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MedicalRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for MedicalRecord.
+func (c *MedicalRecordClient) Query() *MedicalRecordQuery {
+	return &MedicalRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMedicalRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MedicalRecord entity by its id.
+func (c *MedicalRecordClient) Get(ctx context.Context, id uuid.UUID) (*MedicalRecord, error) {
+	return c.Query().Where(medicalrecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MedicalRecordClient) GetX(ctx context.Context, id uuid.UUID) *MedicalRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a MedicalRecord.
+func (c *MedicalRecordClient) QueryUser(mr *MedicalRecord) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(medicalrecord.Table, medicalrecord.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, medicalrecord.UserTable, medicalrecord.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInstitution queries the institution edge of a MedicalRecord.
+func (c *MedicalRecordClient) QueryInstitution(mr *MedicalRecord) *InstitutionQuery {
+	query := (&InstitutionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(medicalrecord.Table, medicalrecord.FieldID, id),
+			sqlgraph.To(institution.Table, institution.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, medicalrecord.InstitutionTable, medicalrecord.InstitutionColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRecordaccess queries the recordaccess edge of a MedicalRecord.
+func (c *MedicalRecordClient) QueryRecordaccess(mr *MedicalRecord) *RecordAccessQuery {
+	query := (&RecordAccessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(medicalrecord.Table, medicalrecord.FieldID, id),
+			sqlgraph.To(recordaccess.Table, recordaccess.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, medicalrecord.RecordaccessTable, medicalrecord.RecordaccessColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MedicalRecordClient) Hooks() []Hook {
+	return c.hooks.MedicalRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *MedicalRecordClient) Interceptors() []Interceptor {
+	return c.inters.MedicalRecord
+}
+
+func (c *MedicalRecordClient) mutate(ctx context.Context, m *MedicalRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MedicalRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MedicalRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MedicalRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MedicalRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MedicalRecord mutation op: %q", m.Op())
+	}
+}
+
+// RecordAccessClient is a client for the RecordAccess schema.
+type RecordAccessClient struct {
+	config
+}
+
+// NewRecordAccessClient returns a client for the RecordAccess from the given config.
+func NewRecordAccessClient(c config) *RecordAccessClient {
+	return &RecordAccessClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `recordaccess.Hooks(f(g(h())))`.
+func (c *RecordAccessClient) Use(hooks ...Hook) {
+	c.hooks.RecordAccess = append(c.hooks.RecordAccess, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `recordaccess.Intercept(f(g(h())))`.
+func (c *RecordAccessClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RecordAccess = append(c.inters.RecordAccess, interceptors...)
+}
+
+// Create returns a builder for creating a RecordAccess entity.
+func (c *RecordAccessClient) Create() *RecordAccessCreate {
+	mutation := newRecordAccessMutation(c.config, OpCreate)
+	return &RecordAccessCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RecordAccess entities.
+func (c *RecordAccessClient) CreateBulk(builders ...*RecordAccessCreate) *RecordAccessCreateBulk {
+	return &RecordAccessCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RecordAccessClient) MapCreateBulk(slice any, setFunc func(*RecordAccessCreate, int)) *RecordAccessCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RecordAccessCreateBulk{err: fmt.Errorf("calling to RecordAccessClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RecordAccessCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RecordAccessCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RecordAccess.
+func (c *RecordAccessClient) Update() *RecordAccessUpdate {
+	mutation := newRecordAccessMutation(c.config, OpUpdate)
+	return &RecordAccessUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RecordAccessClient) UpdateOne(ra *RecordAccess) *RecordAccessUpdateOne {
+	mutation := newRecordAccessMutation(c.config, OpUpdateOne, withRecordAccess(ra))
+	return &RecordAccessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RecordAccessClient) UpdateOneID(id uuid.UUID) *RecordAccessUpdateOne {
+	mutation := newRecordAccessMutation(c.config, OpUpdateOne, withRecordAccessID(id))
+	return &RecordAccessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RecordAccess.
+func (c *RecordAccessClient) Delete() *RecordAccessDelete {
+	mutation := newRecordAccessMutation(c.config, OpDelete)
+	return &RecordAccessDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RecordAccessClient) DeleteOne(ra *RecordAccess) *RecordAccessDeleteOne {
+	return c.DeleteOneID(ra.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RecordAccessClient) DeleteOneID(id uuid.UUID) *RecordAccessDeleteOne {
+	builder := c.Delete().Where(recordaccess.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RecordAccessDeleteOne{builder}
+}
+
+// Query returns a query builder for RecordAccess.
+func (c *RecordAccessClient) Query() *RecordAccessQuery {
+	return &RecordAccessQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRecordAccess},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RecordAccess entity by its id.
+func (c *RecordAccessClient) Get(ctx context.Context, id uuid.UUID) (*RecordAccess, error) {
+	return c.Query().Where(recordaccess.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RecordAccessClient) GetX(ctx context.Context, id uuid.UUID) *RecordAccess {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMedicalrecord queries the medicalrecord edge of a RecordAccess.
+func (c *RecordAccessClient) QueryMedicalrecord(ra *RecordAccess) *MedicalRecordQuery {
+	query := (&MedicalRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ra.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recordaccess.Table, recordaccess.FieldID, id),
+			sqlgraph.To(medicalrecord.Table, medicalrecord.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, recordaccess.MedicalrecordTable, recordaccess.MedicalrecordColumn),
+		)
+		fromV = sqlgraph.Neighbors(ra.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInstitution queries the institution edge of a RecordAccess.
+func (c *RecordAccessClient) QueryInstitution(ra *RecordAccess) *InstitutionQuery {
+	query := (&InstitutionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ra.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recordaccess.Table, recordaccess.FieldID, id),
+			sqlgraph.To(institution.Table, institution.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, recordaccess.InstitutionTable, recordaccess.InstitutionColumn),
+		)
+		fromV = sqlgraph.Neighbors(ra.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RecordAccessClient) Hooks() []Hook {
+	return c.hooks.RecordAccess
+}
+
+// Interceptors returns the client interceptors.
+func (c *RecordAccessClient) Interceptors() []Interceptor {
+	return c.inters.RecordAccess
+}
+
+func (c *RecordAccessClient) mutate(ctx context.Context, m *RecordAccessMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RecordAccessCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RecordAccessUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RecordAccessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RecordAccessDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RecordAccess mutation op: %q", m.Op())
 	}
 }
 
@@ -305,6 +1006,38 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
+// QueryMedicalrecord queries the medicalrecord edge of a User.
+func (c *UserClient) QueryMedicalrecord(u *User) *MedicalRecordQuery {
+	query := (&MedicalRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(medicalrecord.Table, medicalrecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MedicalrecordTable, user.MedicalrecordColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInstitution queries the institution edge of a User.
+func (c *UserClient) QueryInstitution(u *User) *InstitutionQuery {
+	query := (&InstitutionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(institution.Table, institution.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.InstitutionTable, user.InstitutionColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -333,9 +1066,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		User []ent.Hook
+		AccessRequest, Institution, MedicalRecord, RecordAccess, User []ent.Hook
 	}
 	inters struct {
-		User []ent.Interceptor
+		AccessRequest, Institution, MedicalRecord, RecordAccess, User []ent.Interceptor
 	}
 )

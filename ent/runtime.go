@@ -5,6 +5,9 @@ package ent
 import (
 	"time"
 
+	"github.com/vector-ops/lifefolio/ent/institution"
+	"github.com/vector-ops/lifefolio/ent/medicalrecord"
+	"github.com/vector-ops/lifefolio/ent/recordaccess"
 	"github.com/vector-ops/lifefolio/ent/schema"
 	"github.com/vector-ops/lifefolio/ent/user"
 )
@@ -13,15 +16,53 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	institutionFields := schema.Institution{}.Fields()
+	_ = institutionFields
+	// institutionDescIsArchived is the schema descriptor for is_archived field.
+	institutionDescIsArchived := institutionFields[7].Descriptor()
+	// institution.DefaultIsArchived holds the default value on creation for the is_archived field.
+	institution.DefaultIsArchived = institutionDescIsArchived.Default.(bool)
+	// institutionDescIsVerified is the schema descriptor for is_verified field.
+	institutionDescIsVerified := institutionFields[8].Descriptor()
+	// institution.DefaultIsVerified holds the default value on creation for the is_verified field.
+	institution.DefaultIsVerified = institutionDescIsVerified.Default.(bool)
+	// institutionDescCreatedAt is the schema descriptor for created_at field.
+	institutionDescCreatedAt := institutionFields[9].Descriptor()
+	// institution.DefaultCreatedAt holds the default value on creation for the created_at field.
+	institution.DefaultCreatedAt = institutionDescCreatedAt.Default.(func() time.Time)
+	// institutionDescUpdatedAt is the schema descriptor for updated_at field.
+	institutionDescUpdatedAt := institutionFields[10].Descriptor()
+	// institution.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	institution.DefaultUpdatedAt = institutionDescUpdatedAt.Default.(func() time.Time)
+	medicalrecordFields := schema.MedicalRecord{}.Fields()
+	_ = medicalrecordFields
+	// medicalrecordDescIsArchived is the schema descriptor for is_archived field.
+	medicalrecordDescIsArchived := medicalrecordFields[2].Descriptor()
+	// medicalrecord.DefaultIsArchived holds the default value on creation for the is_archived field.
+	medicalrecord.DefaultIsArchived = medicalrecordDescIsArchived.Default.(bool)
+	// medicalrecordDescCreatedAt is the schema descriptor for created_at field.
+	medicalrecordDescCreatedAt := medicalrecordFields[3].Descriptor()
+	// medicalrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	medicalrecord.DefaultCreatedAt = medicalrecordDescCreatedAt.Default.(func() time.Time)
+	// medicalrecordDescUpdatedAt is the schema descriptor for updated_at field.
+	medicalrecordDescUpdatedAt := medicalrecordFields[4].Descriptor()
+	// medicalrecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	medicalrecord.DefaultUpdatedAt = medicalrecordDescUpdatedAt.Default.(func() time.Time)
+	recordaccessFields := schema.RecordAccess{}.Fields()
+	_ = recordaccessFields
+	// recordaccessDescApproved is the schema descriptor for approved field.
+	recordaccessDescApproved := recordaccessFields[1].Descriptor()
+	// recordaccess.DefaultApproved holds the default value on creation for the approved field.
+	recordaccess.DefaultApproved = recordaccessDescApproved.Default.(bool)
 	userFields := schema.User{}.Fields()
 	_ = userFields
-	// userDescFirstName is the schema descriptor for firstName field.
+	// userDescFirstName is the schema descriptor for first_name field.
 	userDescFirstName := userFields[1].Descriptor()
-	// user.FirstNameValidator is a validator for the "firstName" field. It is called by the builders before save.
+	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
-	// userDescLastName is the schema descriptor for lastName field.
+	// userDescLastName is the schema descriptor for last_name field.
 	userDescLastName := userFields[2].Descriptor()
-	// user.LastNameValidator is a validator for the "lastName" field. It is called by the builders before save.
+	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
 	// userDescEmail is the schema descriptor for email field.
 	userDescEmail := userFields[3].Descriptor()
@@ -31,20 +72,20 @@ func init() {
 	userDescDOB := userFields[5].Descriptor()
 	// user.DefaultDOB holds the default value on creation for the DOB field.
 	user.DefaultDOB = userDescDOB.Default.(time.Time)
-	// userDescIsArchived is the schema descriptor for isArchived field.
-	userDescIsArchived := userFields[9].Descriptor()
-	// user.DefaultIsArchived holds the default value on creation for the isArchived field.
+	// userDescIsArchived is the schema descriptor for is_archived field.
+	userDescIsArchived := userFields[10].Descriptor()
+	// user.DefaultIsArchived holds the default value on creation for the is_archived field.
 	user.DefaultIsArchived = userDescIsArchived.Default.(bool)
-	// userDescIsVerified is the schema descriptor for isVerified field.
-	userDescIsVerified := userFields[10].Descriptor()
-	// user.DefaultIsVerified holds the default value on creation for the isVerified field.
+	// userDescIsVerified is the schema descriptor for is_verified field.
+	userDescIsVerified := userFields[11].Descriptor()
+	// user.DefaultIsVerified holds the default value on creation for the is_verified field.
 	user.DefaultIsVerified = userDescIsVerified.Default.(bool)
-	// userDescCreatedAt is the schema descriptor for createdAt field.
-	userDescCreatedAt := userFields[11].Descriptor()
-	// user.DefaultCreatedAt holds the default value on creation for the createdAt field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(time.Time)
-	// userDescUpdatedAt is the schema descriptor for updatedAt field.
-	userDescUpdatedAt := userFields[12].Descriptor()
-	// user.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[12].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[13].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 }

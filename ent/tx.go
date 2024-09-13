@@ -12,6 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AccessRequest is the client for interacting with the AccessRequest builders.
+	AccessRequest *AccessRequestClient
+	// Institution is the client for interacting with the Institution builders.
+	Institution *InstitutionClient
+	// MedicalRecord is the client for interacting with the MedicalRecord builders.
+	MedicalRecord *MedicalRecordClient
+	// RecordAccess is the client for interacting with the RecordAccess builders.
+	RecordAccess *RecordAccessClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -145,6 +153,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AccessRequest = NewAccessRequestClient(tx.config)
+	tx.Institution = NewInstitutionClient(tx.config)
+	tx.MedicalRecord = NewMedicalRecordClient(tx.config)
+	tx.RecordAccess = NewRecordAccessClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
@@ -155,7 +167,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: User.QueryXXX(), the query will be executed
+// applies a query, for example: AccessRequest.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

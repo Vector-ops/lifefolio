@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/vector-ops/lifefolio/ent/institution"
 	"github.com/vector-ops/lifefolio/ent/user"
 )
 
@@ -18,35 +19,74 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// FirstName holds the value of the "firstName" field.
-	FirstName string `json:"firstName,omitempty"`
-	// LastName holds the value of the "lastName" field.
-	LastName string `json:"lastName,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName string `json:"last_name,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
 	// DOB holds the value of the "DOB" field.
 	DOB time.Time `json:"DOB,omitempty"`
-	// BloodGroup holds the value of the "bloodGroup" field.
-	BloodGroup user.BloodGroup `json:"bloodGroup,omitempty"`
+	// UserType holds the value of the "user_type" field.
+	UserType user.UserType `json:"user_type,omitempty"`
+	// BloodGroup holds the value of the "blood_group" field.
+	BloodGroup user.BloodGroup `json:"blood_group,omitempty"`
 	// Weight holds the value of the "weight" field.
 	Weight float32 `json:"weight,omitempty"`
 	// Height holds the value of the "height" field.
 	Height float32 `json:"height,omitempty"`
-	// IsArchived holds the value of the "isArchived" field.
-	IsArchived bool `json:"isArchived,omitempty"`
-	// IsVerified holds the value of the "isVerified" field.
-	IsVerified bool `json:"isVerified,omitempty"`
-	// CreatedAt holds the value of the "createdAt" field.
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	// UpdatedAt holds the value of the "updatedAt" field.
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
-	// ArchivedAt holds the value of the "archivedAt" field.
-	ArchivedAt *time.Time `json:"archivedAt,omitempty"`
-	// VerifiedAt holds the value of the "verifiedAt" field.
-	VerifiedAt   *time.Time `json:"verifiedAt,omitempty"`
-	selectValues sql.SelectValues
+	// IsArchived holds the value of the "is_archived" field.
+	IsArchived bool `json:"is_archived,omitempty"`
+	// IsVerified holds the value of the "is_verified" field.
+	IsVerified bool `json:"is_verified,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// ArchivedAt holds the value of the "archived_at" field.
+	ArchivedAt *time.Time `json:"archived_at,omitempty"`
+	// VerifiedAt holds the value of the "verified_at" field.
+	VerifiedAt *time.Time `json:"verified_at,omitempty"`
+	// Otp holds the value of the "otp" field.
+	Otp *int64 `json:"otp,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges              UserEdges `json:"edges"`
+	institution_doctor *uuid.UUID
+	selectValues       sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Medicalrecord holds the value of the medicalrecord edge.
+	Medicalrecord []*MedicalRecord `json:"medicalrecord,omitempty"`
+	// Institution holds the value of the institution edge.
+	Institution *Institution `json:"institution,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// MedicalrecordOrErr returns the Medicalrecord value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) MedicalrecordOrErr() ([]*MedicalRecord, error) {
+	if e.loadedTypes[0] {
+		return e.Medicalrecord, nil
+	}
+	return nil, &NotLoadedError{edge: "medicalrecord"}
+}
+
+// InstitutionOrErr returns the Institution value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) InstitutionOrErr() (*Institution, error) {
+	if e.Institution != nil {
+		return e.Institution, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: institution.Label}
+	}
+	return nil, &NotLoadedError{edge: "institution"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -58,12 +98,16 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldWeight, user.FieldHeight:
 			values[i] = new(sql.NullFloat64)
-		case user.FieldFirstName, user.FieldLastName, user.FieldEmail, user.FieldPassword, user.FieldBloodGroup:
+		case user.FieldOtp:
+			values[i] = new(sql.NullInt64)
+		case user.FieldFirstName, user.FieldLastName, user.FieldEmail, user.FieldPassword, user.FieldUserType, user.FieldBloodGroup:
 			values[i] = new(sql.NullString)
 		case user.FieldDOB, user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldArchivedAt, user.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
+		case user.ForeignKeys[0]: // institution_doctor
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -87,13 +131,13 @@ func (u *User) assignValues(columns []string, values []any) error {
 			}
 		case user.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field firstName", values[i])
+				return fmt.Errorf("unexpected type %T for field first_name", values[i])
 			} else if value.Valid {
 				u.FirstName = value.String
 			}
 		case user.FieldLastName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field lastName", values[i])
+				return fmt.Errorf("unexpected type %T for field last_name", values[i])
 			} else if value.Valid {
 				u.LastName = value.String
 			}
@@ -115,9 +159,15 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.DOB = value.Time
 			}
+		case user.FieldUserType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user_type", values[i])
+			} else if value.Valid {
+				u.UserType = user.UserType(value.String)
+			}
 		case user.FieldBloodGroup:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field bloodGroup", values[i])
+				return fmt.Errorf("unexpected type %T for field blood_group", values[i])
 			} else if value.Valid {
 				u.BloodGroup = user.BloodGroup(value.String)
 			}
@@ -135,41 +185,55 @@ func (u *User) assignValues(columns []string, values []any) error {
 			}
 		case user.FieldIsArchived:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field isArchived", values[i])
+				return fmt.Errorf("unexpected type %T for field is_archived", values[i])
 			} else if value.Valid {
 				u.IsArchived = value.Bool
 			}
 		case user.FieldIsVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field isVerified", values[i])
+				return fmt.Errorf("unexpected type %T for field is_verified", values[i])
 			} else if value.Valid {
 				u.IsVerified = value.Bool
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				u.CreatedAt = value.Time
 			}
 		case user.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
 			}
 		case user.FieldArchivedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field archivedAt", values[i])
+				return fmt.Errorf("unexpected type %T for field archived_at", values[i])
 			} else if value.Valid {
 				u.ArchivedAt = new(time.Time)
 				*u.ArchivedAt = value.Time
 			}
 		case user.FieldVerifiedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field verifiedAt", values[i])
+				return fmt.Errorf("unexpected type %T for field verified_at", values[i])
 			} else if value.Valid {
 				u.VerifiedAt = new(time.Time)
 				*u.VerifiedAt = value.Time
+			}
+		case user.FieldOtp:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field otp", values[i])
+			} else if value.Valid {
+				u.Otp = new(int64)
+				*u.Otp = value.Int64
+			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field institution_doctor", values[i])
+			} else if value.Valid {
+				u.institution_doctor = new(uuid.UUID)
+				*u.institution_doctor = *value.S.(*uuid.UUID)
 			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
@@ -182,6 +246,16 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
+}
+
+// QueryMedicalrecord queries the "medicalrecord" edge of the User entity.
+func (u *User) QueryMedicalrecord() *MedicalRecordQuery {
+	return NewUserClient(u.config).QueryMedicalrecord(u)
+}
+
+// QueryInstitution queries the "institution" edge of the User entity.
+func (u *User) QueryInstitution() *InstitutionQuery {
+	return NewUserClient(u.config).QueryInstitution(u)
 }
 
 // Update returns a builder for updating this User.
@@ -207,10 +281,10 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
-	builder.WriteString("firstName=")
+	builder.WriteString("first_name=")
 	builder.WriteString(u.FirstName)
 	builder.WriteString(", ")
-	builder.WriteString("lastName=")
+	builder.WriteString("last_name=")
 	builder.WriteString(u.LastName)
 	builder.WriteString(", ")
 	builder.WriteString("email=")
@@ -221,7 +295,10 @@ func (u *User) String() string {
 	builder.WriteString("DOB=")
 	builder.WriteString(u.DOB.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("bloodGroup=")
+	builder.WriteString("user_type=")
+	builder.WriteString(fmt.Sprintf("%v", u.UserType))
+	builder.WriteString(", ")
+	builder.WriteString("blood_group=")
 	builder.WriteString(fmt.Sprintf("%v", u.BloodGroup))
 	builder.WriteString(", ")
 	builder.WriteString("weight=")
@@ -230,26 +307,31 @@ func (u *User) String() string {
 	builder.WriteString("height=")
 	builder.WriteString(fmt.Sprintf("%v", u.Height))
 	builder.WriteString(", ")
-	builder.WriteString("isArchived=")
+	builder.WriteString("is_archived=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsArchived))
 	builder.WriteString(", ")
-	builder.WriteString("isVerified=")
+	builder.WriteString("is_verified=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsVerified))
 	builder.WriteString(", ")
-	builder.WriteString("createdAt=")
+	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updatedAt=")
+	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	if v := u.ArchivedAt; v != nil {
-		builder.WriteString("archivedAt=")
+		builder.WriteString("archived_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	if v := u.VerifiedAt; v != nil {
-		builder.WriteString("verifiedAt=")
+		builder.WriteString("verified_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := u.Otp; v != nil {
+		builder.WriteString("otp=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
 	return builder.String()

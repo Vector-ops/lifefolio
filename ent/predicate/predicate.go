@@ -6,5 +6,17 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AccessRequest is the predicate function for accessrequest builders.
+type AccessRequest func(*sql.Selector)
+
+// Institution is the predicate function for institution builders.
+type Institution func(*sql.Selector)
+
+// MedicalRecord is the predicate function for medicalrecord builders.
+type MedicalRecord func(*sql.Selector)
+
+// RecordAccess is the predicate function for recordaccess builders.
+type RecordAccess func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
