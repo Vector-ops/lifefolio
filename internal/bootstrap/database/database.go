@@ -22,6 +22,7 @@ func (db *Database) SetupEntClient() {
 	drv := entsql.OpenDB("pgx", pgdb)
 
 	db.EntClient = ent.NewClient(ent.Driver(drv))
+
 }
 
 func (db *Database) SetupRedis() {
