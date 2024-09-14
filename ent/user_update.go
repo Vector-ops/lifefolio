@@ -31,6 +31,20 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// SetPatientID sets the "patient_id" field.
+func (uu *UserUpdate) SetPatientID(s string) *UserUpdate {
+	uu.mutation.SetPatientID(s)
+	return uu
+}
+
+// SetNillablePatientID sets the "patient_id" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePatientID(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPatientID(*s)
+	}
+	return uu
+}
+
 // SetFirstName sets the "first_name" field.
 func (uu *UserUpdate) SetFirstName(s string) *UserUpdate {
 	uu.mutation.SetFirstName(s)
@@ -98,6 +112,12 @@ func (uu *UserUpdate) SetNillableDOB(t *time.Time) *UserUpdate {
 	if t != nil {
 		uu.SetDOB(*t)
 	}
+	return uu
+}
+
+// ClearDOB clears the value of the "DOB" field.
+func (uu *UserUpdate) ClearDOB() *UserUpdate {
+	uu.mutation.ClearDOB()
 	return uu
 }
 
@@ -274,23 +294,23 @@ func (uu *UserUpdate) SetNillableVerifiedAt(t *time.Time) *UserUpdate {
 }
 
 // SetOtp sets the "otp" field.
-func (uu *UserUpdate) SetOtp(i int64) *UserUpdate {
+func (uu *UserUpdate) SetOtp(u uint64) *UserUpdate {
 	uu.mutation.ResetOtp()
-	uu.mutation.SetOtp(i)
+	uu.mutation.SetOtp(u)
 	return uu
 }
 
 // SetNillableOtp sets the "otp" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableOtp(i *int64) *UserUpdate {
-	if i != nil {
-		uu.SetOtp(*i)
+func (uu *UserUpdate) SetNillableOtp(u *uint64) *UserUpdate {
+	if u != nil {
+		uu.SetOtp(*u)
 	}
 	return uu
 }
 
-// AddOtp adds i to the "otp" field.
-func (uu *UserUpdate) AddOtp(i int64) *UserUpdate {
-	uu.mutation.AddOtp(i)
+// AddOtp adds u to the "otp" field.
+func (uu *UserUpdate) AddOtp(u int64) *UserUpdate {
+	uu.mutation.AddOtp(u)
 	return uu
 }
 
@@ -389,6 +409,11 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uu *UserUpdate) check() error {
+	if v, ok := uu.mutation.PatientID(); ok {
+		if err := user.PatientIDValidator(v); err != nil {
+			return &ValidationError{Name: "patient_id", err: fmt.Errorf(`ent: validator failed for field "User.patient_id": %w`, err)}
+		}
+	}
 	if v, ok := uu.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
 			return &ValidationError{Name: "first_name", err: fmt.Errorf(`ent: validator failed for field "User.first_name": %w`, err)}
@@ -402,6 +427,11 @@ func (uu *UserUpdate) check() error {
 	if v, ok := uu.mutation.Email(); ok {
 		if err := user.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if v, ok := uu.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.UserType(); ok {
@@ -429,6 +459,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := uu.mutation.PatientID(); ok {
+		_spec.SetField(user.FieldPatientID, field.TypeString, value)
+	}
 	if value, ok := uu.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 	}
@@ -443,6 +476,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.DOB(); ok {
 		_spec.SetField(user.FieldDOB, field.TypeTime, value)
+	}
+	if uu.mutation.DOBCleared() {
+		_spec.ClearField(user.FieldDOB, field.TypeTime)
 	}
 	if value, ok := uu.mutation.UserType(); ok {
 		_spec.SetField(user.FieldUserType, field.TypeEnum, value)
@@ -490,10 +526,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(user.FieldVerifiedAt, field.TypeTime, value)
 	}
 	if value, ok := uu.mutation.Otp(); ok {
-		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(user.FieldOtp, field.TypeUint64, value)
 	}
 	if value, ok := uu.mutation.AddedOtp(); ok {
-		_spec.AddField(user.FieldOtp, field.TypeInt64, value)
+		_spec.AddField(user.FieldOtp, field.TypeUint64, value)
 	}
 	if uu.mutation.MedicalrecordCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -589,6 +625,20 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
+// SetPatientID sets the "patient_id" field.
+func (uuo *UserUpdateOne) SetPatientID(s string) *UserUpdateOne {
+	uuo.mutation.SetPatientID(s)
+	return uuo
+}
+
+// SetNillablePatientID sets the "patient_id" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePatientID(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPatientID(*s)
+	}
+	return uuo
+}
+
 // SetFirstName sets the "first_name" field.
 func (uuo *UserUpdateOne) SetFirstName(s string) *UserUpdateOne {
 	uuo.mutation.SetFirstName(s)
@@ -656,6 +706,12 @@ func (uuo *UserUpdateOne) SetNillableDOB(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetDOB(*t)
 	}
+	return uuo
+}
+
+// ClearDOB clears the value of the "DOB" field.
+func (uuo *UserUpdateOne) ClearDOB() *UserUpdateOne {
+	uuo.mutation.ClearDOB()
 	return uuo
 }
 
@@ -832,23 +888,23 @@ func (uuo *UserUpdateOne) SetNillableVerifiedAt(t *time.Time) *UserUpdateOne {
 }
 
 // SetOtp sets the "otp" field.
-func (uuo *UserUpdateOne) SetOtp(i int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetOtp(u uint64) *UserUpdateOne {
 	uuo.mutation.ResetOtp()
-	uuo.mutation.SetOtp(i)
+	uuo.mutation.SetOtp(u)
 	return uuo
 }
 
 // SetNillableOtp sets the "otp" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableOtp(i *int64) *UserUpdateOne {
-	if i != nil {
-		uuo.SetOtp(*i)
+func (uuo *UserUpdateOne) SetNillableOtp(u *uint64) *UserUpdateOne {
+	if u != nil {
+		uuo.SetOtp(*u)
 	}
 	return uuo
 }
 
-// AddOtp adds i to the "otp" field.
-func (uuo *UserUpdateOne) AddOtp(i int64) *UserUpdateOne {
-	uuo.mutation.AddOtp(i)
+// AddOtp adds u to the "otp" field.
+func (uuo *UserUpdateOne) AddOtp(u int64) *UserUpdateOne {
+	uuo.mutation.AddOtp(u)
 	return uuo
 }
 
@@ -960,6 +1016,11 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uuo *UserUpdateOne) check() error {
+	if v, ok := uuo.mutation.PatientID(); ok {
+		if err := user.PatientIDValidator(v); err != nil {
+			return &ValidationError{Name: "patient_id", err: fmt.Errorf(`ent: validator failed for field "User.patient_id": %w`, err)}
+		}
+	}
 	if v, ok := uuo.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
 			return &ValidationError{Name: "first_name", err: fmt.Errorf(`ent: validator failed for field "User.first_name": %w`, err)}
@@ -973,6 +1034,11 @@ func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.Email(); ok {
 		if err := user.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if v, ok := uuo.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.UserType(); ok {
@@ -1017,6 +1083,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
+	if value, ok := uuo.mutation.PatientID(); ok {
+		_spec.SetField(user.FieldPatientID, field.TypeString, value)
+	}
 	if value, ok := uuo.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 	}
@@ -1031,6 +1100,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.DOB(); ok {
 		_spec.SetField(user.FieldDOB, field.TypeTime, value)
+	}
+	if uuo.mutation.DOBCleared() {
+		_spec.ClearField(user.FieldDOB, field.TypeTime)
 	}
 	if value, ok := uuo.mutation.UserType(); ok {
 		_spec.SetField(user.FieldUserType, field.TypeEnum, value)
@@ -1078,10 +1150,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.SetField(user.FieldVerifiedAt, field.TypeTime, value)
 	}
 	if value, ok := uuo.mutation.Otp(); ok {
-		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(user.FieldOtp, field.TypeUint64, value)
 	}
 	if value, ok := uuo.mutation.AddedOtp(); ok {
-		_spec.AddField(user.FieldOtp, field.TypeInt64, value)
+		_spec.AddField(user.FieldOtp, field.TypeUint64, value)
 	}
 	if uuo.mutation.MedicalrecordCleared() {
 		edge := &sqlgraph.EdgeSpec{

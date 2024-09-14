@@ -15,6 +15,8 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldPatientID holds the string denoting the patient_id field in the database.
+	FieldPatientID = "patient_id"
 	// FieldFirstName holds the string denoting the first_name field in the database.
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
@@ -72,6 +74,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldPatientID,
 	FieldFirstName,
 	FieldLastName,
 	FieldEmail,
@@ -112,14 +115,16 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// PatientIDValidator is a validator for the "patient_id" field. It is called by the builders before save.
+	PatientIDValidator func(string) error
 	// FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
-	// DefaultDOB holds the default value on creation for the "DOB" field.
-	DefaultDOB time.Time
+	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	PasswordValidator func(string) error
 	// DefaultIsArchived holds the default value on creation for the "is_archived" field.
 	DefaultIsArchived bool
 	// DefaultIsVerified holds the default value on creation for the "is_verified" field.
@@ -191,6 +196,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByPatientID orders the results by the patient_id field.
+func ByPatientID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPatientID, opts...).ToFunc()
 }
 
 // ByFirstName orders the results by the first_name field.

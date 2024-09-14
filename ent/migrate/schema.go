@@ -103,11 +103,12 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "patient_id", Type: field.TypeString},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
 		{Name: "password", Type: field.TypeString},
-		{Name: "dob", Type: field.TypeTime},
+		{Name: "dob", Type: field.TypeTime, Nullable: true},
 		{Name: "user_type", Type: field.TypeEnum, Enums: []string{"PATIENT", "DOCTOR"}, Default: "PATIENT"},
 		{Name: "blood_group", Type: field.TypeEnum, Nullable: true, Enums: []string{"APOS", "ANEG", "BPOS", "BNEG", "ABPOS", "ABNEG", "OPOS", "ONEG"}},
 		{Name: "weight", Type: field.TypeFloat32, Nullable: true},
@@ -118,7 +119,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "archived_at", Type: field.TypeTime},
 		{Name: "verified_at", Type: field.TypeTime},
-		{Name: "otp", Type: field.TypeInt64},
+		{Name: "otp", Type: field.TypeUint64},
 		{Name: "institution_doctor", Type: field.TypeUUID, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -129,7 +130,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_institutions_doctor",
-				Columns:    []*schema.Column{UsersColumns[17]},
+				Columns:    []*schema.Column{UsersColumns[18]},
 				RefColumns: []*schema.Column{InstitutionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -56,36 +56,40 @@ func init() {
 	recordaccess.DefaultApproved = recordaccessDescApproved.Default.(bool)
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescPatientID is the schema descriptor for patient_id field.
+	userDescPatientID := userFields[1].Descriptor()
+	// user.PatientIDValidator is a validator for the "patient_id" field. It is called by the builders before save.
+	user.PatientIDValidator = userDescPatientID.Validators[0].(func(string) error)
 	// userDescFirstName is the schema descriptor for first_name field.
-	userDescFirstName := userFields[1].Descriptor()
+	userDescFirstName := userFields[2].Descriptor()
 	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
 	// userDescLastName is the schema descriptor for last_name field.
-	userDescLastName := userFields[2].Descriptor()
+	userDescLastName := userFields[3].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
 	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[3].Descriptor()
+	userDescEmail := userFields[4].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
-	// userDescDOB is the schema descriptor for DOB field.
-	userDescDOB := userFields[5].Descriptor()
-	// user.DefaultDOB holds the default value on creation for the DOB field.
-	user.DefaultDOB = userDescDOB.Default.(time.Time)
+	// userDescPassword is the schema descriptor for password field.
+	userDescPassword := userFields[5].Descriptor()
+	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescIsArchived is the schema descriptor for is_archived field.
-	userDescIsArchived := userFields[10].Descriptor()
+	userDescIsArchived := userFields[11].Descriptor()
 	// user.DefaultIsArchived holds the default value on creation for the is_archived field.
 	user.DefaultIsArchived = userDescIsArchived.Default.(bool)
 	// userDescIsVerified is the schema descriptor for is_verified field.
-	userDescIsVerified := userFields[11].Descriptor()
+	userDescIsVerified := userFields[12].Descriptor()
 	// user.DefaultIsVerified holds the default value on creation for the is_verified field.
 	user.DefaultIsVerified = userDescIsVerified.Default.(bool)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[12].Descriptor()
+	userDescCreatedAt := userFields[13].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[13].Descriptor()
+	userDescUpdatedAt := userFields[14].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 }

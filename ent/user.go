@@ -19,6 +19,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// PatientID holds the value of the "patient_id" field.
+	PatientID string `json:"patient_id,omitempty"`
 	// FirstName holds the value of the "first_name" field.
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
@@ -50,7 +52,7 @@ type User struct {
 	// VerifiedAt holds the value of the "verified_at" field.
 	VerifiedAt *time.Time `json:"verified_at,omitempty"`
 	// Otp holds the value of the "otp" field.
-	Otp *int64 `json:"otp,omitempty"`
+	Otp *uint64 `json:"otp,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges              UserEdges `json:"edges"`
@@ -100,7 +102,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case user.FieldOtp:
 			values[i] = new(sql.NullInt64)
-		case user.FieldFirstName, user.FieldLastName, user.FieldEmail, user.FieldPassword, user.FieldUserType, user.FieldBloodGroup:
+		case user.FieldPatientID, user.FieldFirstName, user.FieldLastName, user.FieldEmail, user.FieldPassword, user.FieldUserType, user.FieldBloodGroup:
 			values[i] = new(sql.NullString)
 		case user.FieldDOB, user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldArchivedAt, user.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -128,6 +130,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				u.ID = *value
+			}
+		case user.FieldPatientID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field patient_id", values[i])
+			} else if value.Valid {
+				u.PatientID = value.String
 			}
 		case user.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -225,8 +233,8 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field otp", values[i])
 			} else if value.Valid {
-				u.Otp = new(int64)
-				*u.Otp = value.Int64
+				u.Otp = new(uint64)
+				*u.Otp = uint64(value.Int64)
 			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -281,6 +289,9 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString("patient_id=")
+	builder.WriteString(u.PatientID)
+	builder.WriteString(", ")
 	builder.WriteString("first_name=")
 	builder.WriteString(u.FirstName)
 	builder.WriteString(", ")

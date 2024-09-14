@@ -2873,6 +2873,7 @@ type UserMutation struct {
 	op                   Op
 	typ                  string
 	id                   *uuid.UUID
+	patient_id           *string
 	first_name           *string
 	last_name            *string
 	email                *string
@@ -2890,7 +2891,7 @@ type UserMutation struct {
 	updated_at           *time.Time
 	archived_at          *time.Time
 	verified_at          *time.Time
-	otp                  *int64
+	otp                  *uint64
 	addotp               *int64
 	clearedFields        map[string]struct{}
 	medicalrecord        map[uuid.UUID]struct{}
@@ -3005,6 +3006,42 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetPatientID sets the "patient_id" field.
+func (m *UserMutation) SetPatientID(s string) {
+	m.patient_id = &s
+}
+
+// PatientID returns the value of the "patient_id" field in the mutation.
+func (m *UserMutation) PatientID() (r string, exists bool) {
+	v := m.patient_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatientID returns the old "patient_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldPatientID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatientID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatientID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatientID: %w", err)
+	}
+	return oldValue.PatientID, nil
+}
+
+// ResetPatientID resets all changes to the "patient_id" field.
+func (m *UserMutation) ResetPatientID() {
+	m.patient_id = nil
 }
 
 // SetFirstName sets the "first_name" field.
@@ -3182,9 +3219,22 @@ func (m *UserMutation) OldDOB(ctx context.Context) (v time.Time, err error) {
 	return oldValue.DOB, nil
 }
 
+// ClearDOB clears the value of the "DOB" field.
+func (m *UserMutation) ClearDOB() {
+	m._DOB = nil
+	m.clearedFields[user.FieldDOB] = struct{}{}
+}
+
+// DOBCleared returns if the "DOB" field was cleared in this mutation.
+func (m *UserMutation) DOBCleared() bool {
+	_, ok := m.clearedFields[user.FieldDOB]
+	return ok
+}
+
 // ResetDOB resets all changes to the "DOB" field.
 func (m *UserMutation) ResetDOB() {
 	m._DOB = nil
+	delete(m.clearedFields, user.FieldDOB)
 }
 
 // SetUserType sets the "user_type" field.
@@ -3629,13 +3679,13 @@ func (m *UserMutation) ResetVerifiedAt() {
 }
 
 // SetOtp sets the "otp" field.
-func (m *UserMutation) SetOtp(i int64) {
-	m.otp = &i
+func (m *UserMutation) SetOtp(u uint64) {
+	m.otp = &u
 	m.addotp = nil
 }
 
 // Otp returns the value of the "otp" field in the mutation.
-func (m *UserMutation) Otp() (r int64, exists bool) {
+func (m *UserMutation) Otp() (r uint64, exists bool) {
 	v := m.otp
 	if v == nil {
 		return
@@ -3646,7 +3696,7 @@ func (m *UserMutation) Otp() (r int64, exists bool) {
 // OldOtp returns the old "otp" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldOtp(ctx context.Context) (v *int64, err error) {
+func (m *UserMutation) OldOtp(ctx context.Context) (v *uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOtp is only allowed on UpdateOne operations")
 	}
@@ -3660,12 +3710,12 @@ func (m *UserMutation) OldOtp(ctx context.Context) (v *int64, err error) {
 	return oldValue.Otp, nil
 }
 
-// AddOtp adds i to the "otp" field.
-func (m *UserMutation) AddOtp(i int64) {
+// AddOtp adds u to the "otp" field.
+func (m *UserMutation) AddOtp(u int64) {
 	if m.addotp != nil {
-		*m.addotp += i
+		*m.addotp += u
 	} else {
-		m.addotp = &i
+		m.addotp = &u
 	}
 }
 
@@ -3811,7 +3861,10 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
+	if m.patient_id != nil {
+		fields = append(fields, user.FieldPatientID)
+	}
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -3868,6 +3921,8 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldPatientID:
+		return m.PatientID()
 	case user.FieldFirstName:
 		return m.FirstName()
 	case user.FieldLastName:
@@ -3909,6 +3964,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldPatientID:
+		return m.OldPatientID(ctx)
 	case user.FieldFirstName:
 		return m.OldFirstName(ctx)
 	case user.FieldLastName:
@@ -3950,6 +4007,13 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldPatientID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatientID(v)
+		return nil
 	case user.FieldFirstName:
 		v, ok := value.(string)
 		if !ok {
@@ -4056,7 +4120,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetVerifiedAt(v)
 		return nil
 	case user.FieldOtp:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4131,6 +4195,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldDOB) {
+		fields = append(fields, user.FieldDOB)
+	}
 	if m.FieldCleared(user.FieldBloodGroup) {
 		fields = append(fields, user.FieldBloodGroup)
 	}
@@ -4154,6 +4221,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldDOB:
+		m.ClearDOB()
+		return nil
 	case user.FieldBloodGroup:
 		m.ClearBloodGroup()
 		return nil
@@ -4171,6 +4241,9 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldPatientID:
+		m.ResetPatientID()
+		return nil
 	case user.FieldFirstName:
 		m.ResetFirstName()
 		return nil

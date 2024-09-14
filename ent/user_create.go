@@ -23,6 +23,12 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetPatientID sets the "patient_id" field.
+func (uc *UserCreate) SetPatientID(s string) *UserCreate {
+	uc.mutation.SetPatientID(s)
+	return uc
+}
+
 // SetFirstName sets the "first_name" field.
 func (uc *UserCreate) SetFirstName(s string) *UserCreate {
 	uc.mutation.SetFirstName(s)
@@ -186,8 +192,8 @@ func (uc *UserCreate) SetVerifiedAt(t time.Time) *UserCreate {
 }
 
 // SetOtp sets the "otp" field.
-func (uc *UserCreate) SetOtp(i int64) *UserCreate {
-	uc.mutation.SetOtp(i)
+func (uc *UserCreate) SetOtp(u uint64) *UserCreate {
+	uc.mutation.SetOtp(u)
 	return uc
 }
 
@@ -266,10 +272,6 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.DOB(); !ok {
-		v := user.DefaultDOB
-		uc.mutation.SetDOB(v)
-	}
 	if _, ok := uc.mutation.UserType(); !ok {
 		v := user.DefaultUserType
 		uc.mutation.SetUserType(v)
@@ -294,6 +296,14 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
+	if _, ok := uc.mutation.PatientID(); !ok {
+		return &ValidationError{Name: "patient_id", err: errors.New(`ent: missing required field "User.patient_id"`)}
+	}
+	if v, ok := uc.mutation.PatientID(); ok {
+		if err := user.PatientIDValidator(v); err != nil {
+			return &ValidationError{Name: "patient_id", err: fmt.Errorf(`ent: validator failed for field "User.patient_id": %w`, err)}
+		}
+	}
 	if _, ok := uc.mutation.FirstName(); !ok {
 		return &ValidationError{Name: "first_name", err: errors.New(`ent: missing required field "User.first_name"`)}
 	}
@@ -321,8 +331,10 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
 	}
-	if _, ok := uc.mutation.DOB(); !ok {
-		return &ValidationError{Name: "DOB", err: errors.New(`ent: missing required field "User.DOB"`)}
+	if v, ok := uc.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.UserType(); !ok {
 		return &ValidationError{Name: "user_type", err: errors.New(`ent: missing required field "User.user_type"`)}
@@ -393,6 +405,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := uc.mutation.PatientID(); ok {
+		_spec.SetField(user.FieldPatientID, field.TypeString, value)
+		_node.PatientID = value
+	}
 	if value, ok := uc.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 		_node.FirstName = value
@@ -454,7 +470,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.VerifiedAt = &value
 	}
 	if value, ok := uc.mutation.Otp(); ok {
-		_spec.SetField(user.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(user.FieldOtp, field.TypeUint64, value)
 		_node.Otp = &value
 	}
 	if nodes := uc.mutation.MedicalrecordIDs(); len(nodes) > 0 {

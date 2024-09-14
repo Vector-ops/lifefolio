@@ -56,6 +56,11 @@ func IDLTE(id uuid.UUID) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
+// PatientID applies equality check predicate on the "patient_id" field. It's identical to PatientIDEQ.
+func PatientID(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPatientID, v))
+}
+
 // FirstName applies equality check predicate on the "first_name" field. It's identical to FirstNameEQ.
 func FirstName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldFirstName, v))
@@ -122,8 +127,73 @@ func VerifiedAt(v time.Time) predicate.User {
 }
 
 // Otp applies equality check predicate on the "otp" field. It's identical to OtpEQ.
-func Otp(v int64) predicate.User {
+func Otp(v uint64) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldOtp, v))
+}
+
+// PatientIDEQ applies the EQ predicate on the "patient_id" field.
+func PatientIDEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPatientID, v))
+}
+
+// PatientIDNEQ applies the NEQ predicate on the "patient_id" field.
+func PatientIDNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldPatientID, v))
+}
+
+// PatientIDIn applies the In predicate on the "patient_id" field.
+func PatientIDIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldPatientID, vs...))
+}
+
+// PatientIDNotIn applies the NotIn predicate on the "patient_id" field.
+func PatientIDNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldPatientID, vs...))
+}
+
+// PatientIDGT applies the GT predicate on the "patient_id" field.
+func PatientIDGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldPatientID, v))
+}
+
+// PatientIDGTE applies the GTE predicate on the "patient_id" field.
+func PatientIDGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldPatientID, v))
+}
+
+// PatientIDLT applies the LT predicate on the "patient_id" field.
+func PatientIDLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldPatientID, v))
+}
+
+// PatientIDLTE applies the LTE predicate on the "patient_id" field.
+func PatientIDLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldPatientID, v))
+}
+
+// PatientIDContains applies the Contains predicate on the "patient_id" field.
+func PatientIDContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldPatientID, v))
+}
+
+// PatientIDHasPrefix applies the HasPrefix predicate on the "patient_id" field.
+func PatientIDHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldPatientID, v))
+}
+
+// PatientIDHasSuffix applies the HasSuffix predicate on the "patient_id" field.
+func PatientIDHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldPatientID, v))
+}
+
+// PatientIDEqualFold applies the EqualFold predicate on the "patient_id" field.
+func PatientIDEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldPatientID, v))
+}
+
+// PatientIDContainsFold applies the ContainsFold predicate on the "patient_id" field.
+func PatientIDContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldPatientID, v))
 }
 
 // FirstNameEQ applies the EQ predicate on the "first_name" field.
@@ -424,6 +494,16 @@ func DOBLT(v time.Time) predicate.User {
 // DOBLTE applies the LTE predicate on the "DOB" field.
 func DOBLTE(v time.Time) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDOB, v))
+}
+
+// DOBIsNil applies the IsNil predicate on the "DOB" field.
+func DOBIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldDOB))
+}
+
+// DOBNotNil applies the NotNil predicate on the "DOB" field.
+func DOBNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldDOB))
 }
 
 // UserTypeEQ applies the EQ predicate on the "user_type" field.
@@ -757,42 +837,42 @@ func VerifiedAtLTE(v time.Time) predicate.User {
 }
 
 // OtpEQ applies the EQ predicate on the "otp" field.
-func OtpEQ(v int64) predicate.User {
+func OtpEQ(v uint64) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldOtp, v))
 }
 
 // OtpNEQ applies the NEQ predicate on the "otp" field.
-func OtpNEQ(v int64) predicate.User {
+func OtpNEQ(v uint64) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldOtp, v))
 }
 
 // OtpIn applies the In predicate on the "otp" field.
-func OtpIn(vs ...int64) predicate.User {
+func OtpIn(vs ...uint64) predicate.User {
 	return predicate.User(sql.FieldIn(FieldOtp, vs...))
 }
 
 // OtpNotIn applies the NotIn predicate on the "otp" field.
-func OtpNotIn(vs ...int64) predicate.User {
+func OtpNotIn(vs ...uint64) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldOtp, vs...))
 }
 
 // OtpGT applies the GT predicate on the "otp" field.
-func OtpGT(v int64) predicate.User {
+func OtpGT(v uint64) predicate.User {
 	return predicate.User(sql.FieldGT(FieldOtp, v))
 }
 
 // OtpGTE applies the GTE predicate on the "otp" field.
-func OtpGTE(v int64) predicate.User {
+func OtpGTE(v uint64) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldOtp, v))
 }
 
 // OtpLT applies the LT predicate on the "otp" field.
-func OtpLT(v int64) predicate.User {
+func OtpLT(v uint64) predicate.User {
 	return predicate.User(sql.FieldLT(FieldOtp, v))
 }
 
 // OtpLTE applies the LTE predicate on the "otp" field.
-func OtpLTE(v int64) predicate.User {
+func OtpLTE(v uint64) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldOtp, v))
 }
 

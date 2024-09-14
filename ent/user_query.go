@@ -337,12 +337,12 @@ func (uq *UserQuery) WithInstitution(opts ...func(*InstitutionQuery)) *UserQuery
 // Example:
 //
 //	var v []struct {
-//		FirstName string `json:"first_name,omitempty"`
+//		PatientID string `json:"patient_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldFirstName).
+//		GroupBy(user.FieldPatientID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -360,11 +360,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		FirstName string `json:"first_name,omitempty"`
+//		PatientID string `json:"patient_id,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldFirstName).
+//		Select(user.FieldPatientID).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
