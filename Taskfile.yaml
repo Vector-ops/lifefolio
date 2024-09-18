@@ -1,10 +1,54 @@
-version: '3'
+version: "3"
+
+vars:
+    output_dir: "bin"
+    output_file: "lifefolio"
+    main_dir: "./cmd/lifefolio"
+    test_dir: "./tests"
 
 tasks:
-  build:
-    cmds:
-      - go build -v -i main.go
+    # Task to clean the existing build
+    clean:
+        desc: "Remove existing build"
+        cmds:
+            - "rm -rf {{.output_dir}}"
 
-  assets:
-    cmds:
-      - esbuild --bundle --minify css/index.css > public/bundle.css
+    # Task to build the Go project
+    build:
+        desc: "Build the Go project"
+        cmds:
+            - "echo 'Building project...'"
+            - "go build -o {{.output_dir}}/{{.output_file}} {{.main_dir}}"
+        preconditions:
+            - sh: test -d {{.output_dir}} || mkdir -p {{.output_dir}}
+
+    # Task to run the Go project after building
+    run:
+        desc: "Run the Go project"
+        deps: [build] # Ensure the project is built before running
+        cmds:
+            - "echo 'Running project...'"
+            - "./{{.output_dir}}/{{.output_file}}"
+
+    # Task to run Go tests
+    test:
+        desc: "Run tests"
+        cmds:
+            - "echo 'Running tests...'"
+            - "go test -v {{.test_dir}}"
+
+    # A combined task that builds, tests, and runs the project
+    all:
+        desc: "Build, test, and run the project"
+        deps: [build, test, run]
+
+    # Docker-related tasks
+    docker-start:
+        desc: "Start Docker services"
+        cmds:
+            - "docker compose up -d"
+
+    docker-stop:
+        desc: "Stop Docker services"
+        cmds:
+            - "docker compose down"
