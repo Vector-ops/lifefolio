@@ -14,6 +14,7 @@ type User struct {
 	FirstName  string          `json:"first_name,omitempty"`
 	LastName   string          `json:"last_name,omitempty"`
 	Email      string          `json:"email,omitempty"`
+	Password   string          `json:"-"`
 	DOB        time.Time       `json:"dob,omitempty"`
 	UserType   user.UserType   `json:"user_type,omitempty"`
 	BloodGroup user.BloodGroup `json:"blood_group,omitempty"`
@@ -34,6 +35,7 @@ func TransformUser(user *ent.User) *User {
 		FirstName:  user.FirstName,
 		LastName:   user.LastName,
 		Email:      user.Email,
+		Password:   user.Password,
 		DOB:        user.DOB,
 		UserType:   user.UserType,
 		BloodGroup: user.BloodGroup,
