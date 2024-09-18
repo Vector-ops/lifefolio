@@ -18,6 +18,10 @@ import (
 func init() {
 	institutionFields := schema.Institution{}.Fields()
 	_ = institutionFields
+	// institutionDescEmail is the schema descriptor for email field.
+	institutionDescEmail := institutionFields[4].Descriptor()
+	// institution.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	institution.EmailValidator = institutionDescEmail.Validators[0].(func(string) error)
 	// institutionDescIsArchived is the schema descriptor for is_archived field.
 	institutionDescIsArchived := institutionFields[7].Descriptor()
 	// institution.DefaultIsArchived holds the default value on creation for the is_archived field.
@@ -37,21 +41,21 @@ func init() {
 	medicalrecordFields := schema.MedicalRecord{}.Fields()
 	_ = medicalrecordFields
 	// medicalrecordDescIsArchived is the schema descriptor for is_archived field.
-	medicalrecordDescIsArchived := medicalrecordFields[2].Descriptor()
+	medicalrecordDescIsArchived := medicalrecordFields[4].Descriptor()
 	// medicalrecord.DefaultIsArchived holds the default value on creation for the is_archived field.
 	medicalrecord.DefaultIsArchived = medicalrecordDescIsArchived.Default.(bool)
 	// medicalrecordDescCreatedAt is the schema descriptor for created_at field.
-	medicalrecordDescCreatedAt := medicalrecordFields[3].Descriptor()
+	medicalrecordDescCreatedAt := medicalrecordFields[5].Descriptor()
 	// medicalrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
 	medicalrecord.DefaultCreatedAt = medicalrecordDescCreatedAt.Default.(func() time.Time)
 	// medicalrecordDescUpdatedAt is the schema descriptor for updated_at field.
-	medicalrecordDescUpdatedAt := medicalrecordFields[4].Descriptor()
+	medicalrecordDescUpdatedAt := medicalrecordFields[6].Descriptor()
 	// medicalrecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	medicalrecord.DefaultUpdatedAt = medicalrecordDescUpdatedAt.Default.(func() time.Time)
 	recordaccessFields := schema.RecordAccess{}.Fields()
 	_ = recordaccessFields
 	// recordaccessDescApproved is the schema descriptor for approved field.
-	recordaccessDescApproved := recordaccessFields[1].Descriptor()
+	recordaccessDescApproved := recordaccessFields[3].Descriptor()
 	// recordaccess.DefaultApproved holds the default value on creation for the approved field.
 	recordaccess.DefaultApproved = recordaccessDescApproved.Default.(bool)
 	userFields := schema.User{}.Fields()

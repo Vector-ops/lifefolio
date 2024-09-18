@@ -137,8 +137,8 @@ func (ic *InstitutionCreate) SetVerifiedAt(t time.Time) *InstitutionCreate {
 }
 
 // SetOtp sets the "otp" field.
-func (ic *InstitutionCreate) SetOtp(i int64) *InstitutionCreate {
-	ic.mutation.SetOtp(i)
+func (ic *InstitutionCreate) SetOtp(u uint64) *InstitutionCreate {
+	ic.mutation.SetOtp(u)
 	return ic
 }
 
@@ -260,6 +260,11 @@ func (ic *InstitutionCreate) check() error {
 	if _, ok := ic.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Institution.email"`)}
 	}
+	if v, ok := ic.mutation.Email(); ok {
+		if err := institution.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Institution.email": %w`, err)}
+		}
+	}
 	if _, ok := ic.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "Institution.password"`)}
 	}
@@ -368,7 +373,7 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 		_node.VerifiedAt = &value
 	}
 	if value, ok := ic.mutation.Otp(); ok {
-		_spec.SetField(institution.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(institution.FieldOtp, field.TypeUint64, value)
 		_node.Otp = &value
 	}
 	if nodes := ic.mutation.RecordaccessIDs(); len(nodes) > 0 {

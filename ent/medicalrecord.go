@@ -20,6 +20,10 @@ type MedicalRecord struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID uuid.UUID `json:"user_id,omitempty"`
+	// InstitutionID holds the value of the "institution_id" field.
+	InstitutionID uuid.UUID `json:"institution_id,omitempty"`
 	// File holds the value of the "file" field.
 	File string `json:"file,omitempty"`
 	// IsArchived holds the value of the "is_archived" field.
@@ -32,10 +36,8 @@ type MedicalRecord struct {
 	ArchivedAt *time.Time `json:"archived_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MedicalRecordQuery when eager-loading is set.
-	Edges                     MedicalRecordEdges `json:"edges"`
-	institution_medicalrecord *uuid.UUID
-	user_medicalrecord        *uuid.UUID
-	selectValues              sql.SelectValues
+	Edges        MedicalRecordEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // MedicalRecordEdges holds the relations/edges for other nodes in the graph.
@@ -93,12 +95,8 @@ func (*MedicalRecord) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case medicalrecord.FieldCreatedAt, medicalrecord.FieldUpdatedAt, medicalrecord.FieldArchivedAt:
 			values[i] = new(sql.NullTime)
-		case medicalrecord.FieldID:
+		case medicalrecord.FieldID, medicalrecord.FieldUserID, medicalrecord.FieldInstitutionID:
 			values[i] = new(uuid.UUID)
-		case medicalrecord.ForeignKeys[0]: // institution_medicalrecord
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case medicalrecord.ForeignKeys[1]: // user_medicalrecord
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -119,6 +117,18 @@ func (mr *MedicalRecord) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				mr.ID = *value
+			}
+		case medicalrecord.FieldUserID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value != nil {
+				mr.UserID = *value
+			}
+		case medicalrecord.FieldInstitutionID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field institution_id", values[i])
+			} else if value != nil {
+				mr.InstitutionID = *value
 			}
 		case medicalrecord.FieldFile:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -150,20 +160,6 @@ func (mr *MedicalRecord) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				mr.ArchivedAt = new(time.Time)
 				*mr.ArchivedAt = value.Time
-			}
-		case medicalrecord.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_medicalrecord", values[i])
-			} else if value.Valid {
-				mr.institution_medicalrecord = new(uuid.UUID)
-				*mr.institution_medicalrecord = *value.S.(*uuid.UUID)
-			}
-		case medicalrecord.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field user_medicalrecord", values[i])
-			} else if value.Valid {
-				mr.user_medicalrecord = new(uuid.UUID)
-				*mr.user_medicalrecord = *value.S.(*uuid.UUID)
 			}
 		default:
 			mr.selectValues.Set(columns[i], values[i])
@@ -216,6 +212,12 @@ func (mr *MedicalRecord) String() string {
 	var builder strings.Builder
 	builder.WriteString("MedicalRecord(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", mr.ID))
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", mr.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("institution_id=")
+	builder.WriteString(fmt.Sprintf("%v", mr.InstitutionID))
+	builder.WriteString(", ")
 	builder.WriteString("file=")
 	builder.WriteString(mr.File)
 	builder.WriteString(", ")

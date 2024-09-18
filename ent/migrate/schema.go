@@ -8,23 +8,13 @@ import (
 )
 
 var (
-	// AccessRequestsColumns holds the columns for the "access_requests" table.
-	AccessRequestsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-	}
-	// AccessRequestsTable holds the schema information for the "access_requests" table.
-	AccessRequestsTable = &schema.Table{
-		Name:       "access_requests",
-		Columns:    AccessRequestsColumns,
-		PrimaryKey: []*schema.Column{AccessRequestsColumns[0]},
-	}
 	// InstitutionsColumns holds the columns for the "institutions" table.
 	InstitutionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "location", Type: field.TypeString, Size: 2147483647},
-		{Name: "email", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "phone", Type: field.TypeString, Nullable: true},
 		{Name: "is_archived", Type: field.TypeBool, Default: false},
@@ -33,7 +23,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "archived_at", Type: field.TypeTime},
 		{Name: "verified_at", Type: field.TypeTime},
-		{Name: "otp", Type: field.TypeInt64},
+		{Name: "otp", Type: field.TypeUint64},
 	}
 	// InstitutionsTable holds the schema information for the "institutions" table.
 	InstitutionsTable = &schema.Table{
@@ -49,8 +39,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "archived_at", Type: field.TypeTime},
-		{Name: "institution_medicalrecord", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_medicalrecord", Type: field.TypeUUID, Nullable: true},
+		{Name: "institution_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// MedicalRecordsTable holds the schema information for the "medical_records" table.
 	MedicalRecordsTable = &schema.Table{
@@ -68,7 +58,19 @@ var (
 				Symbol:     "medical_records_users_medicalrecord",
 				Columns:    []*schema.Column{MedicalRecordsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "medicalrecord_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{MedicalRecordsColumns[7]},
+			},
+			{
+				Name:    "medicalrecord_institution_id",
+				Unique:  false,
+				Columns: []*schema.Column{MedicalRecordsColumns[6]},
 			},
 		},
 	}
@@ -77,8 +79,8 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "approved", Type: field.TypeBool, Default: false},
 		{Name: "approved_at", Type: field.TypeTime},
-		{Name: "institution_recordaccess", Type: field.TypeUUID, Nullable: true},
-		{Name: "medical_record_recordaccess", Type: field.TypeUUID, Nullable: true},
+		{Name: "institution_id", Type: field.TypeUUID},
+		{Name: "record_id", Type: field.TypeUUID},
 	}
 	// RecordAccessesTable holds the schema information for the "record_accesses" table.
 	RecordAccessesTable = &schema.Table{
@@ -90,23 +92,35 @@ var (
 				Symbol:     "record_accesses_institutions_recordaccess",
 				Columns:    []*schema.Column{RecordAccessesColumns[3]},
 				RefColumns: []*schema.Column{InstitutionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "record_accesses_medical_records_recordaccess",
 				Columns:    []*schema.Column{RecordAccessesColumns[4]},
 				RefColumns: []*schema.Column{MedicalRecordsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "recordaccess_record_id",
+				Unique:  false,
+				Columns: []*schema.Column{RecordAccessesColumns[4]},
+			},
+			{
+				Name:    "recordaccess_institution_id",
+				Unique:  false,
+				Columns: []*schema.Column{RecordAccessesColumns[3]},
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "patient_id", Type: field.TypeString},
+		{Name: "patient_id", Type: field.TypeString, Unique: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "email", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "dob", Type: field.TypeTime, Nullable: true},
 		{Name: "user_type", Type: field.TypeEnum, Enums: []string{"PATIENT", "DOCTOR"}, Default: "PATIENT"},
@@ -138,7 +152,6 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AccessRequestsTable,
 		InstitutionsTable,
 		MedicalRecordsTable,
 		RecordAccessesTable,

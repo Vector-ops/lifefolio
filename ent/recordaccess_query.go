@@ -27,7 +27,6 @@ type RecordAccessQuery struct {
 	predicates        []predicate.RecordAccess
 	withMedicalrecord *MedicalRecordQuery
 	withInstitution   *InstitutionQuery
-	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -336,12 +335,12 @@ func (raq *RecordAccessQuery) WithInstitution(opts ...func(*InstitutionQuery)) *
 // Example:
 //
 //	var v []struct {
-//		Approved bool `json:"approved,omitempty"`
+//		RecordID uuid.UUID `json:"record_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RecordAccess.Query().
-//		GroupBy(recordaccess.FieldApproved).
+//		GroupBy(recordaccess.FieldRecordID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (raq *RecordAccessQuery) GroupBy(field string, fields ...string) *RecordAccessGroupBy {
@@ -359,11 +358,11 @@ func (raq *RecordAccessQuery) GroupBy(field string, fields ...string) *RecordAcc
 // Example:
 //
 //	var v []struct {
-//		Approved bool `json:"approved,omitempty"`
+//		RecordID uuid.UUID `json:"record_id,omitempty"`
 //	}
 //
 //	client.RecordAccess.Query().
-//		Select(recordaccess.FieldApproved).
+//		Select(recordaccess.FieldRecordID).
 //		Scan(ctx, &v)
 func (raq *RecordAccessQuery) Select(fields ...string) *RecordAccessSelect {
 	raq.ctx.Fields = append(raq.ctx.Fields, fields...)
@@ -407,19 +406,12 @@ func (raq *RecordAccessQuery) prepareQuery(ctx context.Context) error {
 func (raq *RecordAccessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RecordAccess, error) {
 	var (
 		nodes       = []*RecordAccess{}
-		withFKs     = raq.withFKs
 		_spec       = raq.querySpec()
 		loadedTypes = [2]bool{
 			raq.withMedicalrecord != nil,
 			raq.withInstitution != nil,
 		}
 	)
-	if raq.withMedicalrecord != nil || raq.withInstitution != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, recordaccess.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RecordAccess).scanValues(nil, columns)
 	}
@@ -457,10 +449,7 @@ func (raq *RecordAccessQuery) loadMedicalrecord(ctx context.Context, query *Medi
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*RecordAccess)
 	for i := range nodes {
-		if nodes[i].medical_record_recordaccess == nil {
-			continue
-		}
-		fk := *nodes[i].medical_record_recordaccess
+		fk := nodes[i].RecordID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -477,7 +466,7 @@ func (raq *RecordAccessQuery) loadMedicalrecord(ctx context.Context, query *Medi
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "medical_record_recordaccess" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "record_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -489,10 +478,7 @@ func (raq *RecordAccessQuery) loadInstitution(ctx context.Context, query *Instit
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*RecordAccess)
 	for i := range nodes {
-		if nodes[i].institution_recordaccess == nil {
-			continue
-		}
-		fk := *nodes[i].institution_recordaccess
+		fk := nodes[i].InstitutionID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -509,7 +495,7 @@ func (raq *RecordAccessQuery) loadInstitution(ctx context.Context, query *Instit
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_recordaccess" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "institution_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -542,6 +528,12 @@ func (raq *RecordAccessQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != recordaccess.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if raq.withMedicalrecord != nil {
+			_spec.Node.AddColumnOnce(recordaccess.FieldRecordID)
+		}
+		if raq.withInstitution != nil {
+			_spec.Node.AddColumnOnce(recordaccess.FieldInstitutionID)
 		}
 	}
 	if ps := raq.predicates; len(ps) > 0 {

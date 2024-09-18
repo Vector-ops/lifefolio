@@ -56,6 +56,16 @@ func IDLTE(id uuid.UUID) predicate.RecordAccess {
 	return predicate.RecordAccess(sql.FieldLTE(FieldID, id))
 }
 
+// RecordID applies equality check predicate on the "record_id" field. It's identical to RecordIDEQ.
+func RecordID(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldEQ(FieldRecordID, v))
+}
+
+// InstitutionID applies equality check predicate on the "institution_id" field. It's identical to InstitutionIDEQ.
+func InstitutionID(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldEQ(FieldInstitutionID, v))
+}
+
 // Approved applies equality check predicate on the "approved" field. It's identical to ApprovedEQ.
 func Approved(v bool) predicate.RecordAccess {
 	return predicate.RecordAccess(sql.FieldEQ(FieldApproved, v))
@@ -64,6 +74,46 @@ func Approved(v bool) predicate.RecordAccess {
 // ApprovedAt applies equality check predicate on the "approved_at" field. It's identical to ApprovedAtEQ.
 func ApprovedAt(v time.Time) predicate.RecordAccess {
 	return predicate.RecordAccess(sql.FieldEQ(FieldApprovedAt, v))
+}
+
+// RecordIDEQ applies the EQ predicate on the "record_id" field.
+func RecordIDEQ(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldEQ(FieldRecordID, v))
+}
+
+// RecordIDNEQ applies the NEQ predicate on the "record_id" field.
+func RecordIDNEQ(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldNEQ(FieldRecordID, v))
+}
+
+// RecordIDIn applies the In predicate on the "record_id" field.
+func RecordIDIn(vs ...uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldIn(FieldRecordID, vs...))
+}
+
+// RecordIDNotIn applies the NotIn predicate on the "record_id" field.
+func RecordIDNotIn(vs ...uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldNotIn(FieldRecordID, vs...))
+}
+
+// InstitutionIDEQ applies the EQ predicate on the "institution_id" field.
+func InstitutionIDEQ(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldEQ(FieldInstitutionID, v))
+}
+
+// InstitutionIDNEQ applies the NEQ predicate on the "institution_id" field.
+func InstitutionIDNEQ(v uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldNEQ(FieldInstitutionID, v))
+}
+
+// InstitutionIDIn applies the In predicate on the "institution_id" field.
+func InstitutionIDIn(vs ...uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldIn(FieldInstitutionID, vs...))
+}
+
+// InstitutionIDNotIn applies the NotIn predicate on the "institution_id" field.
+func InstitutionIDNotIn(vs ...uuid.UUID) predicate.RecordAccess {
+	return predicate.RecordAccess(sql.FieldNotIn(FieldInstitutionID, vs...))
 }
 
 // ApprovedEQ applies the EQ predicate on the "approved" field.

@@ -12,6 +12,10 @@ const (
 	Label = "record_access"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldRecordID holds the string denoting the record_id field in the database.
+	FieldRecordID = "record_id"
+	// FieldInstitutionID holds the string denoting the institution_id field in the database.
+	FieldInstitutionID = "institution_id"
 	// FieldApproved holds the string denoting the approved field in the database.
 	FieldApproved = "approved"
 	// FieldApprovedAt holds the string denoting the approved_at field in the database.
@@ -28,39 +32,29 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "medicalrecord" package.
 	MedicalrecordInverseTable = "medical_records"
 	// MedicalrecordColumn is the table column denoting the medicalrecord relation/edge.
-	MedicalrecordColumn = "medical_record_recordaccess"
+	MedicalrecordColumn = "record_id"
 	// InstitutionTable is the table that holds the institution relation/edge.
 	InstitutionTable = "record_accesses"
 	// InstitutionInverseTable is the table name for the Institution entity.
 	// It exists in this package in order to avoid circular dependency with the "institution" package.
 	InstitutionInverseTable = "institutions"
 	// InstitutionColumn is the table column denoting the institution relation/edge.
-	InstitutionColumn = "institution_recordaccess"
+	InstitutionColumn = "institution_id"
 )
 
 // Columns holds all SQL columns for recordaccess fields.
 var Columns = []string{
 	FieldID,
+	FieldRecordID,
+	FieldInstitutionID,
 	FieldApproved,
 	FieldApprovedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "record_accesses"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"institution_recordaccess",
-	"medical_record_recordaccess",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -78,6 +72,16 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByRecordID orders the results by the record_id field.
+func ByRecordID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRecordID, opts...).ToFunc()
+}
+
+// ByInstitutionID orders the results by the institution_id field.
+func ByInstitutionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInstitutionID, opts...).ToFunc()
 }
 
 // ByApproved orders the results by the approved field.

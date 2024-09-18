@@ -56,6 +56,16 @@ func IDLTE(id uuid.UUID) predicate.MedicalRecord {
 	return predicate.MedicalRecord(sql.FieldLTE(FieldID, id))
 }
 
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldEQ(FieldUserID, v))
+}
+
+// InstitutionID applies equality check predicate on the "institution_id" field. It's identical to InstitutionIDEQ.
+func InstitutionID(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldEQ(FieldInstitutionID, v))
+}
+
 // File applies equality check predicate on the "file" field. It's identical to FileEQ.
 func File(v string) predicate.MedicalRecord {
 	return predicate.MedicalRecord(sql.FieldEQ(FieldFile, v))
@@ -79,6 +89,56 @@ func UpdatedAt(v time.Time) predicate.MedicalRecord {
 // ArchivedAt applies equality check predicate on the "archived_at" field. It's identical to ArchivedAtEQ.
 func ArchivedAt(v time.Time) predicate.MedicalRecord {
 	return predicate.MedicalRecord(sql.FieldEQ(FieldArchivedAt, v))
+}
+
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// InstitutionIDEQ applies the EQ predicate on the "institution_id" field.
+func InstitutionIDEQ(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldEQ(FieldInstitutionID, v))
+}
+
+// InstitutionIDNEQ applies the NEQ predicate on the "institution_id" field.
+func InstitutionIDNEQ(v uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldNEQ(FieldInstitutionID, v))
+}
+
+// InstitutionIDIn applies the In predicate on the "institution_id" field.
+func InstitutionIDIn(vs ...uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldIn(FieldInstitutionID, vs...))
+}
+
+// InstitutionIDNotIn applies the NotIn predicate on the "institution_id" field.
+func InstitutionIDNotIn(vs ...uuid.UUID) predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldNotIn(FieldInstitutionID, vs...))
+}
+
+// InstitutionIDIsNil applies the IsNil predicate on the "institution_id" field.
+func InstitutionIDIsNil() predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldIsNull(FieldInstitutionID))
+}
+
+// InstitutionIDNotNil applies the NotNil predicate on the "institution_id" field.
+func InstitutionIDNotNil() predicate.MedicalRecord {
+	return predicate.MedicalRecord(sql.FieldNotNull(FieldInstitutionID))
 }
 
 // FileEQ applies the EQ predicate on the "file" field.

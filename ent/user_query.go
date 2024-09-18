@@ -465,7 +465,9 @@ func (uq *UserQuery) loadMedicalrecord(ctx context.Context, query *MedicalRecord
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(medicalrecord.FieldUserID)
+	}
 	query.Where(predicate.MedicalRecord(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.MedicalrecordColumn), fks...))
 	}))
@@ -474,13 +476,10 @@ func (uq *UserQuery) loadMedicalrecord(ctx context.Context, query *MedicalRecord
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_medicalrecord
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_medicalrecord" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_medicalrecord" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -28,276 +28,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccessRequest = "AccessRequest"
 	TypeInstitution   = "Institution"
 	TypeMedicalRecord = "MedicalRecord"
 	TypeRecordAccess  = "RecordAccess"
 	TypeUser          = "User"
 )
-
-// AccessRequestMutation represents an operation that mutates the AccessRequest nodes in the graph.
-type AccessRequestMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*AccessRequest, error)
-	predicates    []predicate.AccessRequest
-}
-
-var _ ent.Mutation = (*AccessRequestMutation)(nil)
-
-// accessrequestOption allows management of the mutation configuration using functional options.
-type accessrequestOption func(*AccessRequestMutation)
-
-// newAccessRequestMutation creates new mutation for the AccessRequest entity.
-func newAccessRequestMutation(c config, op Op, opts ...accessrequestOption) *AccessRequestMutation {
-	m := &AccessRequestMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeAccessRequest,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withAccessRequestID sets the ID field of the mutation.
-func withAccessRequestID(id int) accessrequestOption {
-	return func(m *AccessRequestMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *AccessRequest
-		)
-		m.oldValue = func(ctx context.Context) (*AccessRequest, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().AccessRequest.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withAccessRequest sets the old AccessRequest of the mutation.
-func withAccessRequest(node *AccessRequest) accessrequestOption {
-	return func(m *AccessRequestMutation) {
-		m.oldValue = func(context.Context) (*AccessRequest, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AccessRequestMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m AccessRequestMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *AccessRequestMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *AccessRequestMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().AccessRequest.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// Where appends a list predicates to the AccessRequestMutation builder.
-func (m *AccessRequestMutation) Where(ps ...predicate.AccessRequest) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the AccessRequestMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AccessRequestMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.AccessRequest, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *AccessRequestMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *AccessRequestMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (AccessRequest).
-func (m *AccessRequestMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *AccessRequestMutation) Fields() []string {
-	fields := make([]string, 0, 0)
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *AccessRequestMutation) Field(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *AccessRequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	return nil, fmt.Errorf("unknown AccessRequest field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AccessRequestMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown AccessRequest field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *AccessRequestMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *AccessRequestMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AccessRequestMutation) AddField(name string, value ent.Value) error {
-	return fmt.Errorf("unknown AccessRequest numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *AccessRequestMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *AccessRequestMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *AccessRequestMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown AccessRequest nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *AccessRequestMutation) ResetField(name string) error {
-	return fmt.Errorf("unknown AccessRequest field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AccessRequestMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *AccessRequestMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AccessRequestMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *AccessRequestMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AccessRequestMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *AccessRequestMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *AccessRequestMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown AccessRequest unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *AccessRequestMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown AccessRequest edge %s", name)
-}
 
 // InstitutionMutation represents an operation that mutates the Institution nodes in the graph.
 type InstitutionMutation struct {
@@ -317,7 +52,7 @@ type InstitutionMutation struct {
 	updated_at           *time.Time
 	archived_at          *time.Time
 	verified_at          *time.Time
-	otp                  *int64
+	otp                  *uint64
 	addotp               *int64
 	clearedFields        map[string]struct{}
 	recordaccess         map[uuid.UUID]struct{}
@@ -884,13 +619,13 @@ func (m *InstitutionMutation) ResetVerifiedAt() {
 }
 
 // SetOtp sets the "otp" field.
-func (m *InstitutionMutation) SetOtp(i int64) {
-	m.otp = &i
+func (m *InstitutionMutation) SetOtp(u uint64) {
+	m.otp = &u
 	m.addotp = nil
 }
 
 // Otp returns the value of the "otp" field in the mutation.
-func (m *InstitutionMutation) Otp() (r int64, exists bool) {
+func (m *InstitutionMutation) Otp() (r uint64, exists bool) {
 	v := m.otp
 	if v == nil {
 		return
@@ -901,7 +636,7 @@ func (m *InstitutionMutation) Otp() (r int64, exists bool) {
 // OldOtp returns the old "otp" field's value of the Institution entity.
 // If the Institution object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InstitutionMutation) OldOtp(ctx context.Context) (v *int64, err error) {
+func (m *InstitutionMutation) OldOtp(ctx context.Context) (v *uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOtp is only allowed on UpdateOne operations")
 	}
@@ -915,12 +650,12 @@ func (m *InstitutionMutation) OldOtp(ctx context.Context) (v *int64, err error) 
 	return oldValue.Otp, nil
 }
 
-// AddOtp adds i to the "otp" field.
-func (m *InstitutionMutation) AddOtp(i int64) {
+// AddOtp adds u to the "otp" field.
+func (m *InstitutionMutation) AddOtp(u int64) {
 	if m.addotp != nil {
-		*m.addotp += i
+		*m.addotp += u
 	} else {
-		m.addotp = &i
+		m.addotp = &u
 	}
 }
 
@@ -1338,7 +1073,7 @@ func (m *InstitutionMutation) SetField(name string, value ent.Value) error {
 		m.SetVerifiedAt(v)
 		return nil
 	case institution.FieldOtp:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1724,6 +1459,91 @@ func (m *MedicalRecordMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
+// SetUserID sets the "user_id" field.
+func (m *MedicalRecordMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *MedicalRecordMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the MedicalRecord entity.
+// If the MedicalRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MedicalRecordMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *MedicalRecordMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (m *MedicalRecordMutation) SetInstitutionID(u uuid.UUID) {
+	m.institution = &u
+}
+
+// InstitutionID returns the value of the "institution_id" field in the mutation.
+func (m *MedicalRecordMutation) InstitutionID() (r uuid.UUID, exists bool) {
+	v := m.institution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstitutionID returns the old "institution_id" field's value of the MedicalRecord entity.
+// If the MedicalRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MedicalRecordMutation) OldInstitutionID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInstitutionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInstitutionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstitutionID: %w", err)
+	}
+	return oldValue.InstitutionID, nil
+}
+
+// ClearInstitutionID clears the value of the "institution_id" field.
+func (m *MedicalRecordMutation) ClearInstitutionID() {
+	m.institution = nil
+	m.clearedFields[medicalrecord.FieldInstitutionID] = struct{}{}
+}
+
+// InstitutionIDCleared returns if the "institution_id" field was cleared in this mutation.
+func (m *MedicalRecordMutation) InstitutionIDCleared() bool {
+	_, ok := m.clearedFields[medicalrecord.FieldInstitutionID]
+	return ok
+}
+
+// ResetInstitutionID resets all changes to the "institution_id" field.
+func (m *MedicalRecordMutation) ResetInstitutionID() {
+	m.institution = nil
+	delete(m.clearedFields, medicalrecord.FieldInstitutionID)
+}
+
 // SetFile sets the "file" field.
 func (m *MedicalRecordMutation) SetFile(s string) {
 	m.file = &s
@@ -1904,27 +1724,15 @@ func (m *MedicalRecordMutation) ResetArchivedAt() {
 	m.archived_at = nil
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *MedicalRecordMutation) SetUserID(id uuid.UUID) {
-	m.user = &id
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *MedicalRecordMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[medicalrecord.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *MedicalRecordMutation) UserCleared() bool {
 	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *MedicalRecordMutation) UserID() (id uuid.UUID, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
@@ -1943,27 +1751,15 @@ func (m *MedicalRecordMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// SetInstitutionID sets the "institution" edge to the Institution entity by id.
-func (m *MedicalRecordMutation) SetInstitutionID(id uuid.UUID) {
-	m.institution = &id
-}
-
 // ClearInstitution clears the "institution" edge to the Institution entity.
 func (m *MedicalRecordMutation) ClearInstitution() {
 	m.clearedinstitution = true
+	m.clearedFields[medicalrecord.FieldInstitutionID] = struct{}{}
 }
 
 // InstitutionCleared reports if the "institution" edge to the Institution entity was cleared.
 func (m *MedicalRecordMutation) InstitutionCleared() bool {
-	return m.clearedinstitution
-}
-
-// InstitutionID returns the "institution" edge ID in the mutation.
-func (m *MedicalRecordMutation) InstitutionID() (id uuid.UUID, exists bool) {
-	if m.institution != nil {
-		return *m.institution, true
-	}
-	return
+	return m.InstitutionIDCleared() || m.clearedinstitution
 }
 
 // InstitutionIDs returns the "institution" edge IDs in the mutation.
@@ -2070,7 +1866,13 @@ func (m *MedicalRecordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MedicalRecordMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
+	if m.user != nil {
+		fields = append(fields, medicalrecord.FieldUserID)
+	}
+	if m.institution != nil {
+		fields = append(fields, medicalrecord.FieldInstitutionID)
+	}
 	if m.file != nil {
 		fields = append(fields, medicalrecord.FieldFile)
 	}
@@ -2094,6 +1896,10 @@ func (m *MedicalRecordMutation) Fields() []string {
 // schema.
 func (m *MedicalRecordMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case medicalrecord.FieldUserID:
+		return m.UserID()
+	case medicalrecord.FieldInstitutionID:
+		return m.InstitutionID()
 	case medicalrecord.FieldFile:
 		return m.File()
 	case medicalrecord.FieldIsArchived:
@@ -2113,6 +1919,10 @@ func (m *MedicalRecordMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *MedicalRecordMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case medicalrecord.FieldUserID:
+		return m.OldUserID(ctx)
+	case medicalrecord.FieldInstitutionID:
+		return m.OldInstitutionID(ctx)
 	case medicalrecord.FieldFile:
 		return m.OldFile(ctx)
 	case medicalrecord.FieldIsArchived:
@@ -2132,6 +1942,20 @@ func (m *MedicalRecordMutation) OldField(ctx context.Context, name string) (ent.
 // type.
 func (m *MedicalRecordMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case medicalrecord.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case medicalrecord.FieldInstitutionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstitutionID(v)
+		return nil
 	case medicalrecord.FieldFile:
 		v, ok := value.(string)
 		if !ok {
@@ -2196,7 +2020,11 @@ func (m *MedicalRecordMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *MedicalRecordMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(medicalrecord.FieldInstitutionID) {
+		fields = append(fields, medicalrecord.FieldInstitutionID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2209,6 +2037,11 @@ func (m *MedicalRecordMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *MedicalRecordMutation) ClearField(name string) error {
+	switch name {
+	case medicalrecord.FieldInstitutionID:
+		m.ClearInstitutionID()
+		return nil
+	}
 	return fmt.Errorf("unknown MedicalRecord nullable field %s", name)
 }
 
@@ -2216,6 +2049,12 @@ func (m *MedicalRecordMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *MedicalRecordMutation) ResetField(name string) error {
 	switch name {
+	case medicalrecord.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case medicalrecord.FieldInstitutionID:
+		m.ResetInstitutionID()
+		return nil
 	case medicalrecord.FieldFile:
 		m.ResetFile()
 		return nil
@@ -2477,6 +2316,78 @@ func (m *RecordAccessMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
+// SetRecordID sets the "record_id" field.
+func (m *RecordAccessMutation) SetRecordID(u uuid.UUID) {
+	m.medicalrecord = &u
+}
+
+// RecordID returns the value of the "record_id" field in the mutation.
+func (m *RecordAccessMutation) RecordID() (r uuid.UUID, exists bool) {
+	v := m.medicalrecord
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecordID returns the old "record_id" field's value of the RecordAccess entity.
+// If the RecordAccess object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RecordAccessMutation) OldRecordID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecordID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecordID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecordID: %w", err)
+	}
+	return oldValue.RecordID, nil
+}
+
+// ResetRecordID resets all changes to the "record_id" field.
+func (m *RecordAccessMutation) ResetRecordID() {
+	m.medicalrecord = nil
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (m *RecordAccessMutation) SetInstitutionID(u uuid.UUID) {
+	m.institution = &u
+}
+
+// InstitutionID returns the value of the "institution_id" field in the mutation.
+func (m *RecordAccessMutation) InstitutionID() (r uuid.UUID, exists bool) {
+	v := m.institution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstitutionID returns the old "institution_id" field's value of the RecordAccess entity.
+// If the RecordAccess object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RecordAccessMutation) OldInstitutionID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInstitutionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInstitutionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstitutionID: %w", err)
+	}
+	return oldValue.InstitutionID, nil
+}
+
+// ResetInstitutionID resets all changes to the "institution_id" field.
+func (m *RecordAccessMutation) ResetInstitutionID() {
+	m.institution = nil
+}
+
 // SetApproved sets the "approved" field.
 func (m *RecordAccessMutation) SetApproved(b bool) {
 	m.approved = &b
@@ -2557,6 +2468,7 @@ func (m *RecordAccessMutation) SetMedicalrecordID(id uuid.UUID) {
 // ClearMedicalrecord clears the "medicalrecord" edge to the MedicalRecord entity.
 func (m *RecordAccessMutation) ClearMedicalrecord() {
 	m.clearedmedicalrecord = true
+	m.clearedFields[recordaccess.FieldRecordID] = struct{}{}
 }
 
 // MedicalrecordCleared reports if the "medicalrecord" edge to the MedicalRecord entity was cleared.
@@ -2588,27 +2500,15 @@ func (m *RecordAccessMutation) ResetMedicalrecord() {
 	m.clearedmedicalrecord = false
 }
 
-// SetInstitutionID sets the "institution" edge to the Institution entity by id.
-func (m *RecordAccessMutation) SetInstitutionID(id uuid.UUID) {
-	m.institution = &id
-}
-
 // ClearInstitution clears the "institution" edge to the Institution entity.
 func (m *RecordAccessMutation) ClearInstitution() {
 	m.clearedinstitution = true
+	m.clearedFields[recordaccess.FieldInstitutionID] = struct{}{}
 }
 
 // InstitutionCleared reports if the "institution" edge to the Institution entity was cleared.
 func (m *RecordAccessMutation) InstitutionCleared() bool {
 	return m.clearedinstitution
-}
-
-// InstitutionID returns the "institution" edge ID in the mutation.
-func (m *RecordAccessMutation) InstitutionID() (id uuid.UUID, exists bool) {
-	if m.institution != nil {
-		return *m.institution, true
-	}
-	return
 }
 
 // InstitutionIDs returns the "institution" edge IDs in the mutation.
@@ -2661,7 +2561,13 @@ func (m *RecordAccessMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RecordAccessMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 4)
+	if m.medicalrecord != nil {
+		fields = append(fields, recordaccess.FieldRecordID)
+	}
+	if m.institution != nil {
+		fields = append(fields, recordaccess.FieldInstitutionID)
+	}
 	if m.approved != nil {
 		fields = append(fields, recordaccess.FieldApproved)
 	}
@@ -2676,6 +2582,10 @@ func (m *RecordAccessMutation) Fields() []string {
 // schema.
 func (m *RecordAccessMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case recordaccess.FieldRecordID:
+		return m.RecordID()
+	case recordaccess.FieldInstitutionID:
+		return m.InstitutionID()
 	case recordaccess.FieldApproved:
 		return m.Approved()
 	case recordaccess.FieldApprovedAt:
@@ -2689,6 +2599,10 @@ func (m *RecordAccessMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *RecordAccessMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case recordaccess.FieldRecordID:
+		return m.OldRecordID(ctx)
+	case recordaccess.FieldInstitutionID:
+		return m.OldInstitutionID(ctx)
 	case recordaccess.FieldApproved:
 		return m.OldApproved(ctx)
 	case recordaccess.FieldApprovedAt:
@@ -2702,6 +2616,20 @@ func (m *RecordAccessMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *RecordAccessMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case recordaccess.FieldRecordID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecordID(v)
+		return nil
+	case recordaccess.FieldInstitutionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstitutionID(v)
+		return nil
 	case recordaccess.FieldApproved:
 		v, ok := value.(bool)
 		if !ok {
@@ -2765,6 +2693,12 @@ func (m *RecordAccessMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *RecordAccessMutation) ResetField(name string) error {
 	switch name {
+	case recordaccess.FieldRecordID:
+		m.ResetRecordID()
+		return nil
+	case recordaccess.FieldInstitutionID:
+		m.ResetInstitutionID()
+		return nil
 	case recordaccess.FieldApproved:
 		m.ResetApproved()
 		return nil

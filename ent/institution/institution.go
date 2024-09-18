@@ -54,7 +54,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "recordaccess" package.
 	RecordaccessInverseTable = "record_accesses"
 	// RecordaccessColumn is the table column denoting the recordaccess relation/edge.
-	RecordaccessColumn = "institution_recordaccess"
+	RecordaccessColumn = "institution_id"
 	// DoctorTable is the table that holds the doctor relation/edge.
 	DoctorTable = "users"
 	// DoctorInverseTable is the table name for the User entity.
@@ -68,7 +68,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "medicalrecord" package.
 	MedicalrecordInverseTable = "medical_records"
 	// MedicalrecordColumn is the table column denoting the medicalrecord relation/edge.
-	MedicalrecordColumn = "institution_medicalrecord"
+	MedicalrecordColumn = "institution_id"
 )
 
 // Columns holds all SQL columns for institution fields.
@@ -100,6 +100,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	EmailValidator func(string) error
 	// DefaultIsArchived holds the default value on creation for the "is_archived" field.
 	DefaultIsArchived bool
 	// DefaultIsVerified holds the default value on creation for the "is_verified" field.

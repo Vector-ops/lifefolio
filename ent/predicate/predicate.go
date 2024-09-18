@@ -6,9 +6,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// AccessRequest is the predicate function for accessrequest builders.
-type AccessRequest func(*sql.Selector)
-
 // Institution is the predicate function for institution builders.
 type Institution func(*sql.Selector)
 

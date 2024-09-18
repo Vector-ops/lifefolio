@@ -61,7 +61,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "medicalrecord" package.
 	MedicalrecordInverseTable = "medical_records"
 	// MedicalrecordColumn is the table column denoting the medicalrecord relation/edge.
-	MedicalrecordColumn = "user_medicalrecord"
+	MedicalrecordColumn = "user_id"
 	// InstitutionTable is the table that holds the institution relation/edge.
 	InstitutionTable = "users"
 	// InstitutionInverseTable is the table name for the Institution entity.

@@ -31,6 +31,34 @@ func (rau *RecordAccessUpdate) Where(ps ...predicate.RecordAccess) *RecordAccess
 	return rau
 }
 
+// SetRecordID sets the "record_id" field.
+func (rau *RecordAccessUpdate) SetRecordID(u uuid.UUID) *RecordAccessUpdate {
+	rau.mutation.SetRecordID(u)
+	return rau
+}
+
+// SetNillableRecordID sets the "record_id" field if the given value is not nil.
+func (rau *RecordAccessUpdate) SetNillableRecordID(u *uuid.UUID) *RecordAccessUpdate {
+	if u != nil {
+		rau.SetRecordID(*u)
+	}
+	return rau
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (rau *RecordAccessUpdate) SetInstitutionID(u uuid.UUID) *RecordAccessUpdate {
+	rau.mutation.SetInstitutionID(u)
+	return rau
+}
+
+// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
+func (rau *RecordAccessUpdate) SetNillableInstitutionID(u *uuid.UUID) *RecordAccessUpdate {
+	if u != nil {
+		rau.SetInstitutionID(*u)
+	}
+	return rau
+}
+
 // SetApproved sets the "approved" field.
 func (rau *RecordAccessUpdate) SetApproved(b bool) *RecordAccessUpdate {
 	rau.mutation.SetApproved(b)
@@ -65,31 +93,9 @@ func (rau *RecordAccessUpdate) SetMedicalrecordID(id uuid.UUID) *RecordAccessUpd
 	return rau
 }
 
-// SetNillableMedicalrecordID sets the "medicalrecord" edge to the MedicalRecord entity by ID if the given value is not nil.
-func (rau *RecordAccessUpdate) SetNillableMedicalrecordID(id *uuid.UUID) *RecordAccessUpdate {
-	if id != nil {
-		rau = rau.SetMedicalrecordID(*id)
-	}
-	return rau
-}
-
 // SetMedicalrecord sets the "medicalrecord" edge to the MedicalRecord entity.
 func (rau *RecordAccessUpdate) SetMedicalrecord(m *MedicalRecord) *RecordAccessUpdate {
 	return rau.SetMedicalrecordID(m.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (rau *RecordAccessUpdate) SetInstitutionID(id uuid.UUID) *RecordAccessUpdate {
-	rau.mutation.SetInstitutionID(id)
-	return rau
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (rau *RecordAccessUpdate) SetNillableInstitutionID(id *uuid.UUID) *RecordAccessUpdate {
-	if id != nil {
-		rau = rau.SetInstitutionID(*id)
-	}
-	return rau
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -141,7 +147,21 @@ func (rau *RecordAccessUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (rau *RecordAccessUpdate) check() error {
+	if rau.mutation.MedicalrecordCleared() && len(rau.mutation.MedicalrecordIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "RecordAccess.medicalrecord"`)
+	}
+	if rau.mutation.InstitutionCleared() && len(rau.mutation.InstitutionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "RecordAccess.institution"`)
+	}
+	return nil
+}
+
 func (rau *RecordAccessUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := rau.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(recordaccess.Table, recordaccess.Columns, sqlgraph.NewFieldSpec(recordaccess.FieldID, field.TypeUUID))
 	if ps := rau.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -234,6 +254,34 @@ type RecordAccessUpdateOne struct {
 	mutation *RecordAccessMutation
 }
 
+// SetRecordID sets the "record_id" field.
+func (rauo *RecordAccessUpdateOne) SetRecordID(u uuid.UUID) *RecordAccessUpdateOne {
+	rauo.mutation.SetRecordID(u)
+	return rauo
+}
+
+// SetNillableRecordID sets the "record_id" field if the given value is not nil.
+func (rauo *RecordAccessUpdateOne) SetNillableRecordID(u *uuid.UUID) *RecordAccessUpdateOne {
+	if u != nil {
+		rauo.SetRecordID(*u)
+	}
+	return rauo
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (rauo *RecordAccessUpdateOne) SetInstitutionID(u uuid.UUID) *RecordAccessUpdateOne {
+	rauo.mutation.SetInstitutionID(u)
+	return rauo
+}
+
+// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
+func (rauo *RecordAccessUpdateOne) SetNillableInstitutionID(u *uuid.UUID) *RecordAccessUpdateOne {
+	if u != nil {
+		rauo.SetInstitutionID(*u)
+	}
+	return rauo
+}
+
 // SetApproved sets the "approved" field.
 func (rauo *RecordAccessUpdateOne) SetApproved(b bool) *RecordAccessUpdateOne {
 	rauo.mutation.SetApproved(b)
@@ -268,31 +316,9 @@ func (rauo *RecordAccessUpdateOne) SetMedicalrecordID(id uuid.UUID) *RecordAcces
 	return rauo
 }
 
-// SetNillableMedicalrecordID sets the "medicalrecord" edge to the MedicalRecord entity by ID if the given value is not nil.
-func (rauo *RecordAccessUpdateOne) SetNillableMedicalrecordID(id *uuid.UUID) *RecordAccessUpdateOne {
-	if id != nil {
-		rauo = rauo.SetMedicalrecordID(*id)
-	}
-	return rauo
-}
-
 // SetMedicalrecord sets the "medicalrecord" edge to the MedicalRecord entity.
 func (rauo *RecordAccessUpdateOne) SetMedicalrecord(m *MedicalRecord) *RecordAccessUpdateOne {
 	return rauo.SetMedicalrecordID(m.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (rauo *RecordAccessUpdateOne) SetInstitutionID(id uuid.UUID) *RecordAccessUpdateOne {
-	rauo.mutation.SetInstitutionID(id)
-	return rauo
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (rauo *RecordAccessUpdateOne) SetNillableInstitutionID(id *uuid.UUID) *RecordAccessUpdateOne {
-	if id != nil {
-		rauo = rauo.SetInstitutionID(*id)
-	}
-	return rauo
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -357,7 +383,21 @@ func (rauo *RecordAccessUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (rauo *RecordAccessUpdateOne) check() error {
+	if rauo.mutation.MedicalrecordCleared() && len(rauo.mutation.MedicalrecordIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "RecordAccess.medicalrecord"`)
+	}
+	if rauo.mutation.InstitutionCleared() && len(rauo.mutation.InstitutionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "RecordAccess.institution"`)
+	}
+	return nil
+}
+
 func (rauo *RecordAccessUpdateOne) sqlSave(ctx context.Context) (_node *RecordAccess, err error) {
+	if err := rauo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(recordaccess.Table, recordaccess.Columns, sqlgraph.NewFieldSpec(recordaccess.FieldID, field.TypeUUID))
 	id, ok := rauo.mutation.ID()
 	if !ok {

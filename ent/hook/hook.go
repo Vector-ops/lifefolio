@@ -9,18 +9,6 @@ import (
 	"github.com/vector-ops/lifefolio/ent"
 )
 
-// The AccessRequestFunc type is an adapter to allow the use of ordinary
-// function as AccessRequest mutator.
-type AccessRequestFunc func(context.Context, *ent.AccessRequestMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AccessRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AccessRequestMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccessRequestMutation", m)
-}
-
 // The InstitutionFunc type is an adapter to allow the use of ordinary
 // function as Institution mutator.
 type InstitutionFunc func(context.Context, *ent.InstitutionMutation) (ent.Value, error)

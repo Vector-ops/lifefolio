@@ -32,6 +32,40 @@ func (mru *MedicalRecordUpdate) Where(ps ...predicate.MedicalRecord) *MedicalRec
 	return mru
 }
 
+// SetUserID sets the "user_id" field.
+func (mru *MedicalRecordUpdate) SetUserID(u uuid.UUID) *MedicalRecordUpdate {
+	mru.mutation.SetUserID(u)
+	return mru
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (mru *MedicalRecordUpdate) SetNillableUserID(u *uuid.UUID) *MedicalRecordUpdate {
+	if u != nil {
+		mru.SetUserID(*u)
+	}
+	return mru
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (mru *MedicalRecordUpdate) SetInstitutionID(u uuid.UUID) *MedicalRecordUpdate {
+	mru.mutation.SetInstitutionID(u)
+	return mru
+}
+
+// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
+func (mru *MedicalRecordUpdate) SetNillableInstitutionID(u *uuid.UUID) *MedicalRecordUpdate {
+	if u != nil {
+		mru.SetInstitutionID(*u)
+	}
+	return mru
+}
+
+// ClearInstitutionID clears the value of the "institution_id" field.
+func (mru *MedicalRecordUpdate) ClearInstitutionID() *MedicalRecordUpdate {
+	mru.mutation.ClearInstitutionID()
+	return mru
+}
+
 // SetFile sets the "file" field.
 func (mru *MedicalRecordUpdate) SetFile(s string) *MedicalRecordUpdate {
 	mru.mutation.SetFile(s)
@@ -102,37 +136,9 @@ func (mru *MedicalRecordUpdate) SetNillableArchivedAt(t *time.Time) *MedicalReco
 	return mru
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (mru *MedicalRecordUpdate) SetUserID(id uuid.UUID) *MedicalRecordUpdate {
-	mru.mutation.SetUserID(id)
-	return mru
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (mru *MedicalRecordUpdate) SetNillableUserID(id *uuid.UUID) *MedicalRecordUpdate {
-	if id != nil {
-		mru = mru.SetUserID(*id)
-	}
-	return mru
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (mru *MedicalRecordUpdate) SetUser(u *User) *MedicalRecordUpdate {
 	return mru.SetUserID(u.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (mru *MedicalRecordUpdate) SetInstitutionID(id uuid.UUID) *MedicalRecordUpdate {
-	mru.mutation.SetInstitutionID(id)
-	return mru
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (mru *MedicalRecordUpdate) SetNillableInstitutionID(id *uuid.UUID) *MedicalRecordUpdate {
-	if id != nil {
-		mru = mru.SetInstitutionID(*id)
-	}
-	return mru
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -220,7 +226,18 @@ func (mru *MedicalRecordUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (mru *MedicalRecordUpdate) check() error {
+	if mru.mutation.UserCleared() && len(mru.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "MedicalRecord.user"`)
+	}
+	return nil
+}
+
 func (mru *MedicalRecordUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := mru.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(medicalrecord.Table, medicalrecord.Columns, sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID))
 	if ps := mru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -367,6 +384,40 @@ type MedicalRecordUpdateOne struct {
 	mutation *MedicalRecordMutation
 }
 
+// SetUserID sets the "user_id" field.
+func (mruo *MedicalRecordUpdateOne) SetUserID(u uuid.UUID) *MedicalRecordUpdateOne {
+	mruo.mutation.SetUserID(u)
+	return mruo
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (mruo *MedicalRecordUpdateOne) SetNillableUserID(u *uuid.UUID) *MedicalRecordUpdateOne {
+	if u != nil {
+		mruo.SetUserID(*u)
+	}
+	return mruo
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (mruo *MedicalRecordUpdateOne) SetInstitutionID(u uuid.UUID) *MedicalRecordUpdateOne {
+	mruo.mutation.SetInstitutionID(u)
+	return mruo
+}
+
+// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
+func (mruo *MedicalRecordUpdateOne) SetNillableInstitutionID(u *uuid.UUID) *MedicalRecordUpdateOne {
+	if u != nil {
+		mruo.SetInstitutionID(*u)
+	}
+	return mruo
+}
+
+// ClearInstitutionID clears the value of the "institution_id" field.
+func (mruo *MedicalRecordUpdateOne) ClearInstitutionID() *MedicalRecordUpdateOne {
+	mruo.mutation.ClearInstitutionID()
+	return mruo
+}
+
 // SetFile sets the "file" field.
 func (mruo *MedicalRecordUpdateOne) SetFile(s string) *MedicalRecordUpdateOne {
 	mruo.mutation.SetFile(s)
@@ -437,37 +488,9 @@ func (mruo *MedicalRecordUpdateOne) SetNillableArchivedAt(t *time.Time) *Medical
 	return mruo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (mruo *MedicalRecordUpdateOne) SetUserID(id uuid.UUID) *MedicalRecordUpdateOne {
-	mruo.mutation.SetUserID(id)
-	return mruo
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (mruo *MedicalRecordUpdateOne) SetNillableUserID(id *uuid.UUID) *MedicalRecordUpdateOne {
-	if id != nil {
-		mruo = mruo.SetUserID(*id)
-	}
-	return mruo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (mruo *MedicalRecordUpdateOne) SetUser(u *User) *MedicalRecordUpdateOne {
 	return mruo.SetUserID(u.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (mruo *MedicalRecordUpdateOne) SetInstitutionID(id uuid.UUID) *MedicalRecordUpdateOne {
-	mruo.mutation.SetInstitutionID(id)
-	return mruo
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (mruo *MedicalRecordUpdateOne) SetNillableInstitutionID(id *uuid.UUID) *MedicalRecordUpdateOne {
-	if id != nil {
-		mruo = mruo.SetInstitutionID(*id)
-	}
-	return mruo
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -568,7 +591,18 @@ func (mruo *MedicalRecordUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (mruo *MedicalRecordUpdateOne) check() error {
+	if mruo.mutation.UserCleared() && len(mruo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "MedicalRecord.user"`)
+	}
+	return nil
+}
+
 func (mruo *MedicalRecordUpdateOne) sqlSave(ctx context.Context) (_node *MedicalRecord, err error) {
+	if err := mruo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(medicalrecord.Table, medicalrecord.Columns, sqlgraph.NewFieldSpec(medicalrecord.FieldID, field.TypeUUID))
 	id, ok := mruo.mutation.ID()
 	if !ok {

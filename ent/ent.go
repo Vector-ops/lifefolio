@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/vector-ops/lifefolio/ent/accessrequest"
 	"github.com/vector-ops/lifefolio/ent/institution"
 	"github.com/vector-ops/lifefolio/ent/medicalrecord"
 	"github.com/vector-ops/lifefolio/ent/recordaccess"
@@ -77,7 +76,6 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			accessrequest.Table: accessrequest.ValidColumn,
 			institution.Table:   institution.ValidColumn,
 			medicalrecord.Table: medicalrecord.ValidColumn,
 			recordaccess.Table:  recordaccess.ValidColumn,

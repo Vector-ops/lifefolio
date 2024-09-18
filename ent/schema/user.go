@@ -18,10 +18,10 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.New()),
-		field.String("patient_id").NotEmpty(),
+		field.String("patient_id").NotEmpty().Unique(),
 		field.String("first_name").NotEmpty(),
 		field.String("last_name").NotEmpty(),
-		field.String("email").NotEmpty(),
+		field.String("email").NotEmpty().Unique(),
 		field.String("password").Sensitive().NotEmpty(),
 		field.Time("DOB").Optional(),
 		field.Enum("user_type").Values("PATIENT", "DOCTOR").Default("PATIENT"),

@@ -14,6 +14,10 @@ const (
 	Label = "medical_record"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
+	// FieldInstitutionID holds the string denoting the institution_id field in the database.
+	FieldInstitutionID = "institution_id"
 	// FieldFile holds the string denoting the file field in the database.
 	FieldFile = "file"
 	// FieldIsArchived holds the string denoting the is_archived field in the database.
@@ -38,26 +42,28 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_medicalrecord"
+	UserColumn = "user_id"
 	// InstitutionTable is the table that holds the institution relation/edge.
 	InstitutionTable = "medical_records"
 	// InstitutionInverseTable is the table name for the Institution entity.
 	// It exists in this package in order to avoid circular dependency with the "institution" package.
 	InstitutionInverseTable = "institutions"
 	// InstitutionColumn is the table column denoting the institution relation/edge.
-	InstitutionColumn = "institution_medicalrecord"
+	InstitutionColumn = "institution_id"
 	// RecordaccessTable is the table that holds the recordaccess relation/edge.
 	RecordaccessTable = "record_accesses"
 	// RecordaccessInverseTable is the table name for the RecordAccess entity.
 	// It exists in this package in order to avoid circular dependency with the "recordaccess" package.
 	RecordaccessInverseTable = "record_accesses"
 	// RecordaccessColumn is the table column denoting the recordaccess relation/edge.
-	RecordaccessColumn = "medical_record_recordaccess"
+	RecordaccessColumn = "record_id"
 )
 
 // Columns holds all SQL columns for medicalrecord fields.
 var Columns = []string{
 	FieldID,
+	FieldUserID,
+	FieldInstitutionID,
 	FieldFile,
 	FieldIsArchived,
 	FieldCreatedAt,
@@ -65,22 +71,10 @@ var Columns = []string{
 	FieldArchivedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "medical_records"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"institution_medicalrecord",
-	"user_medicalrecord",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -102,6 +96,16 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByInstitutionID orders the results by the institution_id field.
+func ByInstitutionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInstitutionID, opts...).ToFunc()
 }
 
 // ByFile orders the results by the file field.

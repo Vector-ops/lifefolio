@@ -117,7 +117,7 @@ func VerifiedAt(v time.Time) predicate.Institution {
 }
 
 // Otp applies equality check predicate on the "otp" field. It's identical to OtpEQ.
-func Otp(v int64) predicate.Institution {
+func Otp(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldEQ(FieldOtp, v))
 }
 
@@ -702,42 +702,42 @@ func VerifiedAtLTE(v time.Time) predicate.Institution {
 }
 
 // OtpEQ applies the EQ predicate on the "otp" field.
-func OtpEQ(v int64) predicate.Institution {
+func OtpEQ(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldEQ(FieldOtp, v))
 }
 
 // OtpNEQ applies the NEQ predicate on the "otp" field.
-func OtpNEQ(v int64) predicate.Institution {
+func OtpNEQ(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldNEQ(FieldOtp, v))
 }
 
 // OtpIn applies the In predicate on the "otp" field.
-func OtpIn(vs ...int64) predicate.Institution {
+func OtpIn(vs ...uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldIn(FieldOtp, vs...))
 }
 
 // OtpNotIn applies the NotIn predicate on the "otp" field.
-func OtpNotIn(vs ...int64) predicate.Institution {
+func OtpNotIn(vs ...uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldNotIn(FieldOtp, vs...))
 }
 
 // OtpGT applies the GT predicate on the "otp" field.
-func OtpGT(v int64) predicate.Institution {
+func OtpGT(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldGT(FieldOtp, v))
 }
 
 // OtpGTE applies the GTE predicate on the "otp" field.
-func OtpGTE(v int64) predicate.Institution {
+func OtpGTE(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldGTE(FieldOtp, v))
 }
 
 // OtpLT applies the LT predicate on the "otp" field.
-func OtpLT(v int64) predicate.Institution {
+func OtpLT(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldLT(FieldOtp, v))
 }
 
 // OtpLTE applies the LTE predicate on the "otp" field.
-func OtpLTE(v int64) predicate.Institution {
+func OtpLTE(v uint64) predicate.Institution {
 	return predicate.Institution(sql.FieldLTE(FieldOtp, v))
 }
 

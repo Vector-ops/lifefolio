@@ -30,7 +30,6 @@ type MedicalRecordQuery struct {
 	withUser         *UserQuery
 	withInstitution  *InstitutionQuery
 	withRecordaccess *RecordAccessQuery
-	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -373,12 +372,12 @@ func (mrq *MedicalRecordQuery) WithRecordaccess(opts ...func(*RecordAccessQuery)
 // Example:
 //
 //	var v []struct {
-//		File string `json:"file,omitempty"`
+//		UserID uuid.UUID `json:"user_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.MedicalRecord.Query().
-//		GroupBy(medicalrecord.FieldFile).
+//		GroupBy(medicalrecord.FieldUserID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (mrq *MedicalRecordQuery) GroupBy(field string, fields ...string) *MedicalRecordGroupBy {
@@ -396,11 +395,11 @@ func (mrq *MedicalRecordQuery) GroupBy(field string, fields ...string) *MedicalR
 // Example:
 //
 //	var v []struct {
-//		File string `json:"file,omitempty"`
+//		UserID uuid.UUID `json:"user_id,omitempty"`
 //	}
 //
 //	client.MedicalRecord.Query().
-//		Select(medicalrecord.FieldFile).
+//		Select(medicalrecord.FieldUserID).
 //		Scan(ctx, &v)
 func (mrq *MedicalRecordQuery) Select(fields ...string) *MedicalRecordSelect {
 	mrq.ctx.Fields = append(mrq.ctx.Fields, fields...)
@@ -444,7 +443,6 @@ func (mrq *MedicalRecordQuery) prepareQuery(ctx context.Context) error {
 func (mrq *MedicalRecordQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*MedicalRecord, error) {
 	var (
 		nodes       = []*MedicalRecord{}
-		withFKs     = mrq.withFKs
 		_spec       = mrq.querySpec()
 		loadedTypes = [3]bool{
 			mrq.withUser != nil,
@@ -452,12 +450,6 @@ func (mrq *MedicalRecordQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 			mrq.withRecordaccess != nil,
 		}
 	)
-	if mrq.withUser != nil || mrq.withInstitution != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, medicalrecord.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*MedicalRecord).scanValues(nil, columns)
 	}
@@ -502,10 +494,7 @@ func (mrq *MedicalRecordQuery) loadUser(ctx context.Context, query *UserQuery, n
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*MedicalRecord)
 	for i := range nodes {
-		if nodes[i].user_medicalrecord == nil {
-			continue
-		}
-		fk := *nodes[i].user_medicalrecord
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -522,7 +511,7 @@ func (mrq *MedicalRecordQuery) loadUser(ctx context.Context, query *UserQuery, n
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_medicalrecord" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -534,10 +523,7 @@ func (mrq *MedicalRecordQuery) loadInstitution(ctx context.Context, query *Insti
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*MedicalRecord)
 	for i := range nodes {
-		if nodes[i].institution_medicalrecord == nil {
-			continue
-		}
-		fk := *nodes[i].institution_medicalrecord
+		fk := nodes[i].InstitutionID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -554,7 +540,7 @@ func (mrq *MedicalRecordQuery) loadInstitution(ctx context.Context, query *Insti
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_medicalrecord" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "institution_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -572,7 +558,9 @@ func (mrq *MedicalRecordQuery) loadRecordaccess(ctx context.Context, query *Reco
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(recordaccess.FieldRecordID)
+	}
 	query.Where(predicate.RecordAccess(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(medicalrecord.RecordaccessColumn), fks...))
 	}))
@@ -581,13 +569,10 @@ func (mrq *MedicalRecordQuery) loadRecordaccess(ctx context.Context, query *Reco
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.medical_record_recordaccess
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "medical_record_recordaccess" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.RecordID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "medical_record_recordaccess" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "record_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -618,6 +603,12 @@ func (mrq *MedicalRecordQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != medicalrecord.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if mrq.withUser != nil {
+			_spec.Node.AddColumnOnce(medicalrecord.FieldUserID)
+		}
+		if mrq.withInstitution != nil {
+			_spec.Node.AddColumnOnce(medicalrecord.FieldInstitutionID)
 		}
 	}
 	if ps := mrq.predicates; len(ps) > 0 {

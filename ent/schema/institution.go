@@ -21,7 +21,7 @@ func (Institution) Fields() []ent.Field {
 		field.String("name"),
 		field.Text("description").Nillable(),
 		field.Text("location"),
-		field.String("email"),
+		field.String("email").Unique().NotEmpty(),
 		field.String("password").Sensitive(),
 		field.String("phone").Optional(),
 		field.Bool("is_archived").Default(false),
@@ -30,7 +30,7 @@ func (Institution) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now),
 		field.Time("archived_at").Nillable(),
 		field.Time("verified_at").Nillable(),
-		field.Int64("otp").Nillable(),
+		field.Uint64("otp").Nillable(),
 	}
 }
 

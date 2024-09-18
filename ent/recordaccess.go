@@ -20,16 +20,18 @@ type RecordAccess struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// RecordID holds the value of the "record_id" field.
+	RecordID uuid.UUID `json:"record_id,omitempty"`
+	// InstitutionID holds the value of the "institution_id" field.
+	InstitutionID uuid.UUID `json:"institution_id,omitempty"`
 	// Approved holds the value of the "approved" field.
 	Approved bool `json:"approved,omitempty"`
 	// ApprovedAt holds the value of the "approved_at" field.
 	ApprovedAt *time.Time `json:"approved_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RecordAccessQuery when eager-loading is set.
-	Edges                       RecordAccessEdges `json:"edges"`
-	institution_recordaccess    *uuid.UUID
-	medical_record_recordaccess *uuid.UUID
-	selectValues                sql.SelectValues
+	Edges        RecordAccessEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RecordAccessEdges holds the relations/edges for other nodes in the graph.
@@ -74,12 +76,8 @@ func (*RecordAccess) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case recordaccess.FieldApprovedAt:
 			values[i] = new(sql.NullTime)
-		case recordaccess.FieldID:
+		case recordaccess.FieldID, recordaccess.FieldRecordID, recordaccess.FieldInstitutionID:
 			values[i] = new(uuid.UUID)
-		case recordaccess.ForeignKeys[0]: // institution_recordaccess
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case recordaccess.ForeignKeys[1]: // medical_record_recordaccess
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -101,6 +99,18 @@ func (ra *RecordAccess) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				ra.ID = *value
 			}
+		case recordaccess.FieldRecordID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field record_id", values[i])
+			} else if value != nil {
+				ra.RecordID = *value
+			}
+		case recordaccess.FieldInstitutionID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field institution_id", values[i])
+			} else if value != nil {
+				ra.InstitutionID = *value
+			}
 		case recordaccess.FieldApproved:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field approved", values[i])
@@ -113,20 +123,6 @@ func (ra *RecordAccess) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ra.ApprovedAt = new(time.Time)
 				*ra.ApprovedAt = value.Time
-			}
-		case recordaccess.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_recordaccess", values[i])
-			} else if value.Valid {
-				ra.institution_recordaccess = new(uuid.UUID)
-				*ra.institution_recordaccess = *value.S.(*uuid.UUID)
-			}
-		case recordaccess.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field medical_record_recordaccess", values[i])
-			} else if value.Valid {
-				ra.medical_record_recordaccess = new(uuid.UUID)
-				*ra.medical_record_recordaccess = *value.S.(*uuid.UUID)
 			}
 		default:
 			ra.selectValues.Set(columns[i], values[i])
@@ -174,6 +170,12 @@ func (ra *RecordAccess) String() string {
 	var builder strings.Builder
 	builder.WriteString("RecordAccess(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ra.ID))
+	builder.WriteString("record_id=")
+	builder.WriteString(fmt.Sprintf("%v", ra.RecordID))
+	builder.WriteString(", ")
+	builder.WriteString("institution_id=")
+	builder.WriteString(fmt.Sprintf("%v", ra.InstitutionID))
+	builder.WriteString(", ")
 	builder.WriteString("approved=")
 	builder.WriteString(fmt.Sprintf("%v", ra.Approved))
 	builder.WriteString(", ")

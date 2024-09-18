@@ -43,7 +43,7 @@ type Institution struct {
 	// VerifiedAt holds the value of the "verified_at" field.
 	VerifiedAt *time.Time `json:"verified_at,omitempty"`
 	// Otp holds the value of the "otp" field.
-	Otp *int64 `json:"otp,omitempty"`
+	Otp *uint64 `json:"otp,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InstitutionQuery when eager-loading is set.
 	Edges        InstitutionEdges `json:"edges"`
@@ -205,8 +205,8 @@ func (i *Institution) assignValues(columns []string, values []any) error {
 			if value, ok := values[j].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field otp", values[j])
 			} else if value.Valid {
-				i.Otp = new(int64)
-				*i.Otp = value.Int64
+				i.Otp = new(uint64)
+				*i.Otp = uint64(value.Int64)
 			}
 		default:
 			i.selectValues.Set(columns[j], values[j])

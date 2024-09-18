@@ -207,23 +207,23 @@ func (iu *InstitutionUpdate) SetNillableVerifiedAt(t *time.Time) *InstitutionUpd
 }
 
 // SetOtp sets the "otp" field.
-func (iu *InstitutionUpdate) SetOtp(i int64) *InstitutionUpdate {
+func (iu *InstitutionUpdate) SetOtp(u uint64) *InstitutionUpdate {
 	iu.mutation.ResetOtp()
-	iu.mutation.SetOtp(i)
+	iu.mutation.SetOtp(u)
 	return iu
 }
 
 // SetNillableOtp sets the "otp" field if the given value is not nil.
-func (iu *InstitutionUpdate) SetNillableOtp(i *int64) *InstitutionUpdate {
-	if i != nil {
-		iu.SetOtp(*i)
+func (iu *InstitutionUpdate) SetNillableOtp(u *uint64) *InstitutionUpdate {
+	if u != nil {
+		iu.SetOtp(*u)
 	}
 	return iu
 }
 
-// AddOtp adds i to the "otp" field.
-func (iu *InstitutionUpdate) AddOtp(i int64) *InstitutionUpdate {
-	iu.mutation.AddOtp(i)
+// AddOtp adds u to the "otp" field.
+func (iu *InstitutionUpdate) AddOtp(u int64) *InstitutionUpdate {
+	iu.mutation.AddOtp(u)
 	return iu
 }
 
@@ -367,7 +367,20 @@ func (iu *InstitutionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iu *InstitutionUpdate) check() error {
+	if v, ok := iu.mutation.Email(); ok {
+		if err := institution.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Institution.email": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := iu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(institution.Table, institution.Columns, sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID))
 	if ps := iu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -416,10 +429,10 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(institution.FieldVerifiedAt, field.TypeTime, value)
 	}
 	if value, ok := iu.mutation.Otp(); ok {
-		_spec.SetField(institution.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(institution.FieldOtp, field.TypeUint64, value)
 	}
 	if value, ok := iu.mutation.AddedOtp(); ok {
-		_spec.AddField(institution.FieldOtp, field.TypeInt64, value)
+		_spec.AddField(institution.FieldOtp, field.TypeUint64, value)
 	}
 	if iu.mutation.RecordaccessCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -751,23 +764,23 @@ func (iuo *InstitutionUpdateOne) SetNillableVerifiedAt(t *time.Time) *Institutio
 }
 
 // SetOtp sets the "otp" field.
-func (iuo *InstitutionUpdateOne) SetOtp(i int64) *InstitutionUpdateOne {
+func (iuo *InstitutionUpdateOne) SetOtp(u uint64) *InstitutionUpdateOne {
 	iuo.mutation.ResetOtp()
-	iuo.mutation.SetOtp(i)
+	iuo.mutation.SetOtp(u)
 	return iuo
 }
 
 // SetNillableOtp sets the "otp" field if the given value is not nil.
-func (iuo *InstitutionUpdateOne) SetNillableOtp(i *int64) *InstitutionUpdateOne {
-	if i != nil {
-		iuo.SetOtp(*i)
+func (iuo *InstitutionUpdateOne) SetNillableOtp(u *uint64) *InstitutionUpdateOne {
+	if u != nil {
+		iuo.SetOtp(*u)
 	}
 	return iuo
 }
 
-// AddOtp adds i to the "otp" field.
-func (iuo *InstitutionUpdateOne) AddOtp(i int64) *InstitutionUpdateOne {
-	iuo.mutation.AddOtp(i)
+// AddOtp adds u to the "otp" field.
+func (iuo *InstitutionUpdateOne) AddOtp(u int64) *InstitutionUpdateOne {
+	iuo.mutation.AddOtp(u)
 	return iuo
 }
 
@@ -924,7 +937,20 @@ func (iuo *InstitutionUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iuo *InstitutionUpdateOne) check() error {
+	if v, ok := iuo.mutation.Email(); ok {
+		if err := institution.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Institution.email": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institution, err error) {
+	if err := iuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(institution.Table, institution.Columns, sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID))
 	id, ok := iuo.mutation.ID()
 	if !ok {
@@ -990,10 +1016,10 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 		_spec.SetField(institution.FieldVerifiedAt, field.TypeTime, value)
 	}
 	if value, ok := iuo.mutation.Otp(); ok {
-		_spec.SetField(institution.FieldOtp, field.TypeInt64, value)
+		_spec.SetField(institution.FieldOtp, field.TypeUint64, value)
 	}
 	if value, ok := iuo.mutation.AddedOtp(); ok {
-		_spec.AddField(institution.FieldOtp, field.TypeInt64, value)
+		_spec.AddField(institution.FieldOtp, field.TypeUint64, value)
 	}
 	if iuo.mutation.RecordaccessCleared() {
 		edge := &sqlgraph.EdgeSpec{

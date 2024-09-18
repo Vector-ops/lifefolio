@@ -24,6 +24,26 @@ type MedicalRecordCreate struct {
 	hooks    []Hook
 }
 
+// SetUserID sets the "user_id" field.
+func (mrc *MedicalRecordCreate) SetUserID(u uuid.UUID) *MedicalRecordCreate {
+	mrc.mutation.SetUserID(u)
+	return mrc
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (mrc *MedicalRecordCreate) SetInstitutionID(u uuid.UUID) *MedicalRecordCreate {
+	mrc.mutation.SetInstitutionID(u)
+	return mrc
+}
+
+// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
+func (mrc *MedicalRecordCreate) SetNillableInstitutionID(u *uuid.UUID) *MedicalRecordCreate {
+	if u != nil {
+		mrc.SetInstitutionID(*u)
+	}
+	return mrc
+}
+
 // SetFile sets the "file" field.
 func (mrc *MedicalRecordCreate) SetFile(s string) *MedicalRecordCreate {
 	mrc.mutation.SetFile(s)
@@ -84,37 +104,9 @@ func (mrc *MedicalRecordCreate) SetID(u uuid.UUID) *MedicalRecordCreate {
 	return mrc
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (mrc *MedicalRecordCreate) SetUserID(id uuid.UUID) *MedicalRecordCreate {
-	mrc.mutation.SetUserID(id)
-	return mrc
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (mrc *MedicalRecordCreate) SetNillableUserID(id *uuid.UUID) *MedicalRecordCreate {
-	if id != nil {
-		mrc = mrc.SetUserID(*id)
-	}
-	return mrc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (mrc *MedicalRecordCreate) SetUser(u *User) *MedicalRecordCreate {
 	return mrc.SetUserID(u.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (mrc *MedicalRecordCreate) SetInstitutionID(id uuid.UUID) *MedicalRecordCreate {
-	mrc.mutation.SetInstitutionID(id)
-	return mrc
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (mrc *MedicalRecordCreate) SetNillableInstitutionID(id *uuid.UUID) *MedicalRecordCreate {
-	if id != nil {
-		mrc = mrc.SetInstitutionID(*id)
-	}
-	return mrc
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -188,6 +180,9 @@ func (mrc *MedicalRecordCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (mrc *MedicalRecordCreate) check() error {
+	if _, ok := mrc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "MedicalRecord.user_id"`)}
+	}
 	if _, ok := mrc.mutation.File(); !ok {
 		return &ValidationError{Name: "file", err: errors.New(`ent: missing required field "MedicalRecord.file"`)}
 	}
@@ -202,6 +197,9 @@ func (mrc *MedicalRecordCreate) check() error {
 	}
 	if _, ok := mrc.mutation.ArchivedAt(); !ok {
 		return &ValidationError{Name: "archived_at", err: errors.New(`ent: missing required field "MedicalRecord.archived_at"`)}
+	}
+	if len(mrc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "MedicalRecord.user"`)}
 	}
 	return nil
 }
@@ -272,7 +270,7 @@ func (mrc *MedicalRecordCreate) createSpec() (*MedicalRecord, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_medicalrecord = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mrc.mutation.InstitutionIDs(); len(nodes) > 0 {
@@ -289,7 +287,7 @@ func (mrc *MedicalRecordCreate) createSpec() (*MedicalRecord, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.institution_medicalrecord = &nodes[0]
+		_node.InstitutionID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mrc.mutation.RecordaccessIDs(); len(nodes) > 0 {

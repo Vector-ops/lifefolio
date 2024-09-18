@@ -23,6 +23,18 @@ type RecordAccessCreate struct {
 	hooks    []Hook
 }
 
+// SetRecordID sets the "record_id" field.
+func (rac *RecordAccessCreate) SetRecordID(u uuid.UUID) *RecordAccessCreate {
+	rac.mutation.SetRecordID(u)
+	return rac
+}
+
+// SetInstitutionID sets the "institution_id" field.
+func (rac *RecordAccessCreate) SetInstitutionID(u uuid.UUID) *RecordAccessCreate {
+	rac.mutation.SetInstitutionID(u)
+	return rac
+}
+
 // SetApproved sets the "approved" field.
 func (rac *RecordAccessCreate) SetApproved(b bool) *RecordAccessCreate {
 	rac.mutation.SetApproved(b)
@@ -55,31 +67,9 @@ func (rac *RecordAccessCreate) SetMedicalrecordID(id uuid.UUID) *RecordAccessCre
 	return rac
 }
 
-// SetNillableMedicalrecordID sets the "medicalrecord" edge to the MedicalRecord entity by ID if the given value is not nil.
-func (rac *RecordAccessCreate) SetNillableMedicalrecordID(id *uuid.UUID) *RecordAccessCreate {
-	if id != nil {
-		rac = rac.SetMedicalrecordID(*id)
-	}
-	return rac
-}
-
 // SetMedicalrecord sets the "medicalrecord" edge to the MedicalRecord entity.
 func (rac *RecordAccessCreate) SetMedicalrecord(m *MedicalRecord) *RecordAccessCreate {
 	return rac.SetMedicalrecordID(m.ID)
-}
-
-// SetInstitutionID sets the "institution" edge to the Institution entity by ID.
-func (rac *RecordAccessCreate) SetInstitutionID(id uuid.UUID) *RecordAccessCreate {
-	rac.mutation.SetInstitutionID(id)
-	return rac
-}
-
-// SetNillableInstitutionID sets the "institution" edge to the Institution entity by ID if the given value is not nil.
-func (rac *RecordAccessCreate) SetNillableInstitutionID(id *uuid.UUID) *RecordAccessCreate {
-	if id != nil {
-		rac = rac.SetInstitutionID(*id)
-	}
-	return rac
 }
 
 // SetInstitution sets the "institution" edge to the Institution entity.
@@ -130,11 +120,23 @@ func (rac *RecordAccessCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rac *RecordAccessCreate) check() error {
+	if _, ok := rac.mutation.RecordID(); !ok {
+		return &ValidationError{Name: "record_id", err: errors.New(`ent: missing required field "RecordAccess.record_id"`)}
+	}
+	if _, ok := rac.mutation.InstitutionID(); !ok {
+		return &ValidationError{Name: "institution_id", err: errors.New(`ent: missing required field "RecordAccess.institution_id"`)}
+	}
 	if _, ok := rac.mutation.Approved(); !ok {
 		return &ValidationError{Name: "approved", err: errors.New(`ent: missing required field "RecordAccess.approved"`)}
 	}
 	if _, ok := rac.mutation.ApprovedAt(); !ok {
 		return &ValidationError{Name: "approved_at", err: errors.New(`ent: missing required field "RecordAccess.approved_at"`)}
+	}
+	if len(rac.mutation.MedicalrecordIDs()) == 0 {
+		return &ValidationError{Name: "medicalrecord", err: errors.New(`ent: missing required edge "RecordAccess.medicalrecord"`)}
+	}
+	if len(rac.mutation.InstitutionIDs()) == 0 {
+		return &ValidationError{Name: "institution", err: errors.New(`ent: missing required edge "RecordAccess.institution"`)}
 	}
 	return nil
 }
@@ -193,7 +195,7 @@ func (rac *RecordAccessCreate) createSpec() (*RecordAccess, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.medical_record_recordaccess = &nodes[0]
+		_node.RecordID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := rac.mutation.InstitutionIDs(); len(nodes) > 0 {
@@ -210,7 +212,7 @@ func (rac *RecordAccessCreate) createSpec() (*RecordAccess, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.institution_recordaccess = &nodes[0]
+		_node.InstitutionID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
