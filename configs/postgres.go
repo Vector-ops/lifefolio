@@ -4,16 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 func NewPostgresDB() *sql.DB {
+	postgresHost := GetEnv("POSTGRES_HOST", "localhost")
 	postgresDbName := GetEnv("POSTGRES_DB", "lifefolio_db")
-	postgresUser := GetEnv("POSTGRES_USER", "postgres")
-	postgresPassword := GetEnv("POSTGRES_PASSWORD", "potsgres")
+	postgresUser := GetEnv("POSTGRES_USER", "lifefolio")
+	postgresPassword := GetEnv("POSTGRES_PASSWORD", "postgres")
 
 	postgresURL := fmt.Sprintf(
-		"user=%v password=%v dbname=%v sslmode=disable",
-		postgresUser, postgresPassword, postgresDbName,
+		"host=%s user=%v password=%v dbname=%v sslmode=disable",
+		postgresHost, postgresUser, postgresPassword, postgresDbName,
 	)
 
 	driverName := "postgres"
