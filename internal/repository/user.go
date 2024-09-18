@@ -102,8 +102,9 @@ func (r *UserRepository) ArchiveUser(ctx context.Context, patientId string) erro
 		Exec(ctx)
 }
 
-func (r *UserRepository) AddOTP(ctx context.Context, otp uint64) error {
+func (r *UserRepository) AddOTP(ctx context.Context, patientId string, otp uint64) error {
 	return r.db.User.Update().
+		Where(user.PatientIDEQ(patientId)).
 		SetOtp(otp).
 		Exec(ctx)
 }
@@ -112,4 +113,13 @@ func (r *UserRepository) UpdateUserType(ctx context.Context, userType user.UserT
 	return r.db.User.Update().
 		SetUserType(userType).
 		Exec(ctx)
+}
+
+func (r *UserRepository) GetOTP(ctx context.Context, patientId string) (*uint64, error) {
+	user, err := r.db.User.Query().Where(user.PatientIDEQ(patientId)).Select(user.FieldOtp).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.Otp, nil
 }
